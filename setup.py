@@ -27,7 +27,7 @@ from version import VERSION
 # Get simplejson if we don't already have json
 if sys.version_info < (3, 0):
     try:
-        from util import json
+        import json
     except ImportError:
         install_requires.append('simplejson')
 
