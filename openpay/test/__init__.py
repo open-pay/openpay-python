@@ -5,7 +5,7 @@ import unittest
 def all_names():
     for _, modname, _ in pkgutil.iter_modules(__path__):
         if modname.startswith('test_'):
-            yield 'stripe.test.' + modname
+            yield 'openpay.test.' + modname
 
 
 def all():
