@@ -1,5 +1,7 @@
 """
-Define classes for every resource
+File: resource.py
+Author: Carlos Aguilar
+Description: Define classes for every resource
 """
 import json
 import requests
