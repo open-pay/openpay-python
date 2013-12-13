@@ -10,6 +10,11 @@ from mock import patch, Mock
 
 import openpay
 
+try:
+    import json
+except ImportError as err:
+    import simplejson as json
+
 NOW = datetime.datetime.now()
 
 DUMMY_CARD = {
@@ -28,7 +33,7 @@ DUMMY_PLAN = {
     'interval': 'month',
     'name': 'Amazing Gold Plan',
     'currency': 'usd',
-    'id': ('stripe-test-gold-' +
+    'id': ('openpay-test-gold-' +
            ''.join(random.choice(string.ascii_lowercase) for x in range(10)))
 }
 
@@ -54,7 +59,7 @@ DUMMY_INVOICE_ITEM = {
     'currency': 'usd',
 }
 
-SAMPLE_INVOICE = stripe.util.json.loads("""
+SAMPLE_INVOICE = json.loads("""
 {
   "amount_due": 1305,
   "attempt_count": 0,
@@ -118,7 +123,7 @@ class OpenpayTestCase(unittest.TestCase):
         if api_base:
             openpay.api_base = api_base
         openpay.api_key = os.environ.get(
-            'STRIPE_API_KEY', 'tGN0bIwXnHdwOa85VABjPdSn8nWY7G7I')
+            'OPENPAY_API_KEY', 'tGN0bIwXnHdwOa85VABjPdSn8nWY7G7I')
 
     def tearDown(self):
         super(OpenpayTestCase, self).tearDown()
@@ -144,7 +149,7 @@ class OpenpayTestCase(unittest.TestCase):
                 '%s was not raised' % (exception.__name__,))
 
 
-class OpenpayUnitTestCase(StripeTestCase):
+class OpenpayUnitTestCase(OpenpayTestCase):
     REQUEST_LIBRARIES = ['urlfetch', 'requests', 'pycurl']
 
     if sys.version_info >= (3, 0):
@@ -158,7 +163,7 @@ class OpenpayUnitTestCase(StripeTestCase):
         self.request_patchers = {}
         self.request_mocks = {}
         for lib in self.REQUEST_LIBRARIES:
-            patcher = patch("stripe.http_client.%s" % (lib,))
+            patcher = patch("openpay.http_client.%s" % (lib,))
 
             self.request_mocks[lib] = patcher.start()
             self.request_patchers[lib] = patcher
