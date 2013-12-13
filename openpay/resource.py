@@ -3,7 +3,11 @@ File: resource.py
 Author: Carlos Aguilar
 Description: Define classes for every resource
 """
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 import requests
 
 
@@ -72,7 +76,7 @@ class BaseObject(dict):
 
     def __getitem__(self, k):
         try:
-            super(BaseObject, self).__getitem__(k)
+            return super(BaseObject, self).__getitem__(k)
         except KeyError as err:
             if k in self._transient_values:
                 raise KeyError(
@@ -162,7 +166,7 @@ class APIResource(BaseObject):
 
     @classmethod
     def class_name(cls):
-        if cls = APIResource:
+        if cls == APIResource:
             raise NotImplementedError(
                 'APIResource is an abstract class. You should perform '
                 'action on its subclasses (e.g. Charge, Customer)')

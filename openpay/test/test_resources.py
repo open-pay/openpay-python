@@ -1,6 +1,9 @@
 import openpay
 from openpay import util
 
+from openpay.test.helper import (
+    OpenpayUnitTestCase)
+
 
 class BaseObjectTests(OpenpayUnitTestCase):
 
