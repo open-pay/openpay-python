@@ -9,6 +9,8 @@ except ImportError:
     import simplejson as json
 
 import requests
+import openpay
+from openpay.api import APIClient
 
 
 def convert_to_openpay_object(resp, api_key):
@@ -127,7 +129,7 @@ class BaseObject(dict):
         if params is None:
             params = self._retrieve_params
 
-        requestor = None
+        requestor = APIClient(self.api_key)
         response, api_key = requestor.request(method, url, params)
 
         return convert_to_openpay_object(response, api_key)
