@@ -7,12 +7,7 @@ Author: Carlos Aguilar <caguilar@dwdandsolutions.com>
 
 api_key = None
 
-TEST_MODE = False
-
-if TEST_MODE:
-    api_base = "https://sandbox-api.openpay.mx/"
-else:
-    api_base = "https://api.openpay.mx"
+test_mode = None
 
 api_version = None
 verify_ssl_certs = True
@@ -34,3 +29,12 @@ _ALLOWED_ATTRIBUTES = (
     'TEST_MODE',
 )
 _original_module = _sys.modules[__name__]
+
+
+def get_api_base():
+	if test_mode:
+	    api_base = "https://sandbox-api.openpay.mx"
+	else:
+	    api_base = "https://api.openpay.mx"
+
+	return api_base
