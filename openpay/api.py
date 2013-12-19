@@ -94,20 +94,20 @@ class APIClient(object):
         if my_api_key is None:
             raise error.AuthenticationError(
                 'No API key provided. (HINT: set your API key using '
-                '"stripe.api_key = <API-KEY>"). You can generate API keys '
-                'from the Stripe web interface.  See https://stripe.com/api '
-                'for details, or email support@stripe.com if you have any '
+                '"openpay.api_key = <API-KEY>"). You can generate API keys '
+                'from the Stripe web interface.  See https://openpay.mx/api '
+                'for details, or email support@openpay.mx if you have any '
                 'questions.')
 
         abs_url = "{0}{1}".format(openpay.get_api_base(), url)
 
-        encoded_params = urllib.urlencode(list(_api_encode(params or {})))
+        encoded_params = json.dumps(params)
 
         if method == 'get' or method == 'delete':
             if params:
                 abs_url = _build_api_url(abs_url, encoded_params)
             post_data = None
-        elif method == 'post':
+        elif method == 'post' or method == 'put':
             post_data = encoded_params
         else:
             raise error.APIConnectionError(
@@ -133,6 +133,7 @@ class APIClient(object):
         headers = {
             'X-Openpay-Client-User-Agent': json.dumps(ua),
             'User-Agent': 'Openpay/v1 PythonBindings/%s' % (version.VERSION,),
+            'content-type': 'application/json',
         }
 
         if api_version is not None:
@@ -151,6 +152,10 @@ class APIClient(object):
         try:
             if hasattr(rbody, 'decode'):
                 rbody = rbody.decode('utf-8')
+
+            if rcode == 204:
+                rbody = json.dumps({})
+
             resp = json.loads(rbody)
         except Exception:
             raise error.APIError(

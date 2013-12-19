@@ -8,9 +8,12 @@ try:
 except ImportError:
     import simplejson as json
 
+import copy
+import urllib
 import requests
 import openpay
 from openpay.api import APIClient
+from openpay.util import utf8, logger
 
 
 def convert_to_openpay_object(resp, api_key):
@@ -176,8 +179,9 @@ class APIResource(BaseObject):
 
     @classmethod
     def class_url(cls):
+        merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
-        return "/v1/%ss" % (cls_name,)
+        return "/v1/%s/%ss" % (merchant_id, cls_name)
 
     def instance_url(self):
         id = self.get('id')
@@ -185,7 +189,281 @@ class APIResource(BaseObject):
             raise error.InvalidRequestError(
                 'Could not determine which URL to request: %s instance '
                 'has invalid ID: %r' % (type(self).__name__, id), 'id')
-        id = util.utf8(id)
+        id = utf8(id)
         base = self.class_url()
         extn = urllib.quote_plus(id)
         return "%s/%s" % (base, extn)
+
+
+class ListObject(BaseObject):
+
+    def all(self, **params):
+        return self.request('get', self['url'], params)
+
+    def create(self, **params):
+        return self.request('post', self['url'], params)
+
+    def retrieve(self, id, **params):
+        base = self.get('url')
+        id = utf8(id)
+        extn = urllib.quote_plus(id)
+        url = "%s/%s" % (base, extn)
+
+        return self.request('get', url, params)
+
+
+class SingletonAPIResource(APIResource):
+
+    @classmethod
+    def retrieve(cls, api_key=None):
+        return super(SingletonAPIResource, cls).retrieve(None, api_key=api_key)
+
+    @classmethod
+    def class_url(cls):
+        merchant_id = openpay.merchant_id
+        cls_name = cls.class_name()
+        return "/v1/{0}/{1}s".format(merchant_id, cls_name)
+
+    def instance_url(self):
+        return self.class_url()
+
+
+# Classes of API operations
+class ListableAPIResource(APIResource):
+
+    @classmethod
+    def all(cls, api_key=None, **params):
+        requestor = APIClient(api_key)
+        url = cls.class_url()
+        response, api_key = requestor.request('get', url, params)
+        return convert_to_openpay_object(response, api_key)
+
+
+class CreateableAPIResource(APIResource):
+
+    @classmethod
+    def create(cls, api_key=None, **params):
+        requestor = APIClient(api_key)
+        url = cls.class_url()
+        response, api_key = requestor.request('post', url, params)
+        return convert_to_openpay_object(response, api_key)
+
+
+class UpdateableAPIResource(APIResource):
+
+    def save(self):
+        updated_params = self.serialize(self)
+
+        if getattr(self, 'metadata', None):
+            updated_params['metadata'] = self.serialize_metadata()
+
+        if updated_params:
+            updated_params = copy.deepcopy(self)
+            updated_params.update({'status': None, 'balance': None})
+            self.refresh_from(self.request('put', self.instance_url(),
+                                           updated_params))
+        else:
+            logger.debug("Trying to save already saved object %r", self)
+        return self
+
+    def serialize_metadata(self):
+        if 'metadata' in self._unsaved_values:
+            # the metadata object has been reassigned
+            # i.e. as object.metadata = {key: val}
+            metadata_update = self.metadata
+            keys_to_unset = set(self._previous_metadata.keys()) - \
+                set(self.metadata.keys())
+            for key in keys_to_unset:
+                metadata_update[key] = ""
+
+            return metadata_update
+        else:
+            return self.serialize(self.metadata)
+
+    def serialize(self, obj):
+        params = {}
+        if obj._unsaved_values:
+            for k in obj._unsaved_values:
+                if k == 'id' or k == '_previous_metadata':
+                    continue
+                v = getattr(obj, k)
+                params[k] = v if v is not None else ""
+        return params
+
+
+class DeletableAPIResource(APIResource):
+
+    def delete(self, **params):
+        self.refresh_from(self.request('delete', self.instance_url(), params))
+        return self
+
+# API objects
+
+
+class Account(SingletonAPIResource):
+    pass
+
+
+class Balance(SingletonAPIResource):
+    pass
+
+
+class BalanceTransaction(ListableAPIResource):
+
+    @classmethod
+    def class_url(cls):
+        return '/v1/balance/history'
+
+
+class Card(UpdateableAPIResource, DeletableAPIResource):
+
+    def instance_url(self):
+        self.id = utf8(self.id)
+        self.customer = utf8(self.customer)
+
+        base = Customer.class_url()
+        cust_extn = urllib.quote_plus(self.customer)
+        extn = urllib.quote_plus(self.id)
+
+        return "%s/%s/cards/%s" % (base, cust_extn, extn)
+
+    @classmethod
+    def retrieve(cls, id, api_key=None, **params):
+        raise NotImplementedError(
+            "Can't retrieve a card without a customer ID. Use "
+            "customer.cards.retrieve('card_id') instead.")
+
+
+class Charge(CreateableAPIResource, ListableAPIResource,
+             UpdateableAPIResource):
+
+    def refund(self, **params):
+        url = self.instance_url() + '/refund'
+        self.refresh_from(self.request('post', url, params))
+        return self
+
+    def capture(self, **params):
+        url = self.instance_url() + '/capture'
+        self.refresh_from(self.request('post', url, params))
+        return self
+
+    def update_dispute(self, **params):
+        requestor = APIClient(self.api_key)
+        url = self.instance_url() + '/dispute'
+        response, api_key = requestor.request('post', url, params)
+        self.refresh_from({'dispute': response}, api_key, True)
+        return self.dispute
+
+    def close_dispute(self):
+        rrequestor = APIClient(self.api_key)
+        url = self.instance_url() + '/dispute/close'
+        response, api_key = requestor.request('post', url, {})
+        self.refresh_from({'dispute': response}, api_key, True)
+        return self.dispute
+
+
+class Customer(CreateableAPIResource, UpdateableAPIResource,
+               ListableAPIResource, DeletableAPIResource):
+
+    def add_invoice_item(self, **params):
+        params['customer'] = self.id
+        ii = InvoiceItem.create(self.api_key, **params)
+        return ii
+
+    def invoices(self, **params):
+        params['customer'] = self.id
+        invoices = Invoice.all(self.api_key, **params)
+        return invoices
+
+    def invoice_items(self, **params):
+        params['customer'] = self.id
+        iis = InvoiceItem.all(self.api_key, **params)
+        return iis
+
+    def charges(self, **params):
+        params['customer'] = self.id
+        charges = Charge.all(self.api_key, **params)
+        return charges
+
+    def update_subscription(self, **params):
+        requestor = APIClient(self.api_key)
+        url = self.instance_url() + '/subscription'
+        response, api_key = requestor.request('post', url, params)
+        self.refresh_from({'subscription': response}, api_key, True)
+        return self.subscription
+
+    def cancel_subscription(self, **params):
+        requestor = APIClient(self.api_key)
+        url = self.instance_url() + '/subscription'
+        response, api_key = requestor.request('delete', url, params)
+        self.refresh_from({'subscription': response}, api_key, True)
+        return self.subscription
+
+    def delete_discount(self, **params):
+        requestor = APIClient(self.api_key)
+        url = self.instance_url() + '/discount'
+        _, api_key = requestor.request('delete', url)
+        self.refresh_from({'discount': None}, api_key, True)
+
+
+class Invoice(CreateableAPIResource, ListableAPIResource,
+              UpdateableAPIResource):
+
+    def pay(self):
+        return self.request('post', self.instance_url() + '/pay', {})
+
+    @classmethod
+    def upcoming(cls, api_key=None, **params):
+        requestor = APIClient(self.api_key)
+        url = cls.class_url() + '/upcoming'
+        response, api_key = requestor.request('get', url, params)
+        return convert_to_openpay_object(response, api_key)
+
+
+class InvoiceItem(CreateableAPIResource, UpdateableAPIResource,
+                  ListableAPIResource, DeletableAPIResource):
+    pass
+
+
+class Plan(CreateableAPIResource, DeletableAPIResource,
+           UpdateableAPIResource, ListableAPIResource):
+    pass
+
+
+class Token(CreateableAPIResource):
+    pass
+
+
+class Coupon(CreateableAPIResource, DeletableAPIResource,
+             ListableAPIResource):
+    pass
+
+
+class Event(ListableAPIResource):
+    pass
+
+
+class Transfer(CreateableAPIResource, UpdateableAPIResource,
+               ListableAPIResource):
+    pass
+
+
+class Recipient(CreateableAPIResource, UpdateableAPIResource,
+                ListableAPIResource, DeletableAPIResource):
+
+    def transfers(self, **params):
+        params['recipient'] = self.id
+        transfers = Transfer.all(self.api_key, **params)
+        return transfers
+
+
+class ApplicationFee(ListableAPIResource):
+
+    @classmethod
+    def class_name(cls):
+        return 'application_fee'
+
+    def refund(self, **params):
+        url = self.instance_url() + '/refund'
+        self.refresh_from(self.request('post', url, params))
+        return self
