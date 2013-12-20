@@ -315,7 +315,16 @@ class BalanceTransaction(ListableAPIResource):
         return '/v1/balance/history'
 
 
-class Card(UpdateableAPIResource, DeletableAPIResource):
+class Card(ListableAPIResource, UpdateableAPIResource, DeletableAPIResource):
+
+    @classmethod
+    def class_url(cls, params=None):
+        merchant_id = openpay.merchant_id
+        cls_name = cls.class_name()
+        if params:
+            return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
+        else:
+            return "/v1/%s/%ss" % (merchant_id, cls_name)
 
     def instance_url(self):
         self.id = utf8(self.id)
@@ -426,6 +435,11 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
         url = self.instance_url() + '/discount'
         _, api_key = requestor.request('delete', url)
         self.refresh_from({'discount': None}, api_key, True)
+
+    def cards(self, **params):
+        params['customer'] = self.id
+        cards = Card.all(self.api_key, **params)
+        return cards
 
 
 class Invoice(CreateableAPIResource, ListableAPIResource,
