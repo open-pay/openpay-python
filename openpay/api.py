@@ -41,6 +41,15 @@ def _api_encode(data):
             yield (key, util.utf8(value))
 
 
+def _build_api_url(url, query):
+    scheme, netloc, path, base_query, fragment = urlparse.urlsplit(url)
+
+    if base_query:
+        query = '%s&%s' % (base_query, query)
+
+    return urlparse.urlunsplit((scheme, netloc, path, query, fragment))
+
+
 class APIClient(object):
 
     def __init__(self, key=None, client=None, test_mode=False):
@@ -84,6 +93,10 @@ class APIClient(object):
         Mechanism for issuing an API call
         """
         from openpay import api_version
+
+        # Removing no needed params
+        if 'customer' in params.keys():
+            del params['customer']
 
         if self.api_key:
             my_api_key = self.api_key

@@ -234,7 +234,7 @@ class ListableAPIResource(APIResource):
     @classmethod
     def all(cls, api_key=None, **params):
         requestor = APIClient(api_key)
-        url = cls.class_url()
+        url = cls.class_url(params)
         response, api_key = requestor.request('get', url, params)
         return convert_to_openpay_object(response, api_key)
 
@@ -244,7 +244,7 @@ class CreateableAPIResource(APIResource):
     @classmethod
     def create(cls, api_key=None, **params):
         requestor = APIClient(api_key)
-        url = cls.class_url()
+        url = cls.class_url(params)
         response, api_key = requestor.request('post', url, params)
         return convert_to_openpay_object(response, api_key)
 
@@ -337,6 +337,15 @@ class Card(UpdateableAPIResource, DeletableAPIResource):
 class Charge(CreateableAPIResource, ListableAPIResource,
              UpdateableAPIResource):
 
+    @classmethod
+    def class_url(cls, params=None):
+        merchant_id = openpay.merchant_id
+        cls_name = cls.class_name()
+        if params:
+            return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
+        else:
+            return "/v1/%s/%ss" % (merchant_id, cls_name)
+
     def refund(self, **params):
         url = self.instance_url() + '/refund'
         self.refresh_from(self.request('post', url, params))
@@ -360,6 +369,19 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         response, api_key = requestor.request('post', url, {})
         self.refresh_from({'dispute': response}, api_key, True)
         return self.dispute
+
+    @classmethod
+    def as_merchant(cls):
+        params = {}
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = APIClient(api_key)
+        url = cls.class_url()
+        response, api_key = requestor.request('get', url, params)
+        return convert_to_openpay_object(response, api_key)
 
 
 class Customer(CreateableAPIResource, UpdateableAPIResource,
