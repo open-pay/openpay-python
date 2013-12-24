@@ -17,3 +17,11 @@ merchant_charges = openpay.Charge.as_merchant()
 print "\n\nCharges as merchant"
 for charge in merchant_charges:
 	print charge
+
+print "\n\nRetrieving Charge with ID: t8vgbjfy4vdx3xttigyj"
+charge = openpay.Charge.retrieve_as_merchant('t8vgbjfy4vdx3xttigyj')
+print charge
+
+print "\n\nRetrieving Charge for customer {0} with ID: teh5ydydhg4he8ympogf".format(customer.name)
+charge = customer.retrieve_charge(charge='teh5ydydhg4he8ympogf')
+print charge

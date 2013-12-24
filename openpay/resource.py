@@ -178,10 +178,13 @@ class APIResource(BaseObject):
         return str(cls.__name__.lower())
 
     @classmethod
-    def class_url(cls):
+    def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
-        return "/v1/%s/%ss" % (merchant_id, cls_name)
+        if params and params.get('customer') is not None:
+            return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
+        else:
+            return "/v1/%s/%ss" % (merchant_id, cls_name)
 
     def instance_url(self):
         id = self.get('id')
@@ -190,7 +193,11 @@ class APIResource(BaseObject):
                 'Could not determine which URL to request: %s instance '
                 'has invalid ID: %r' % (type(self).__name__, id), 'id')
         id = utf8(id)
-        base = self.class_url()
+        params = None
+        if 'customer' in self._retrieve_params.keys():
+            params = {'customer': self._retrieve_params.get('customer')}
+
+        base = self.class_url(params)
         extn = urllib.quote_plus(id)
         return "%s/%s" % (base, extn)
 
@@ -259,7 +266,11 @@ class UpdateableAPIResource(APIResource):
 
         if updated_params:
             updated_params = copy.deepcopy(self)
-            updated_params.update({'status': None, 'balance': None})
+            if 'balance' in updated_params.keys() and 'status' in updated_params.keys():
+                updated_params.update({'status': None, 'balance': None})
+            else:
+                updated_params.update({'status': None})
+
             self.refresh_from(self.request('put', self.instance_url(),
                                            updated_params))
         else:
@@ -392,6 +403,20 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         response, api_key = requestor.request('get', url, params)
         return convert_to_openpay_object(response, api_key)
 
+    @classmethod
+    def retrieve_as_merchant(cls, charge_id):
+        params = {}
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = APIClient(api_key)
+        url = cls.class_url()
+        url = "{0}/{1}".format(url, charge_id)
+        response, api_key = requestor.request('get', url, params)
+        return convert_to_openpay_object(response, api_key)
+
 
 class Customer(CreateableAPIResource, UpdateableAPIResource,
                ListableAPIResource, DeletableAPIResource):
@@ -418,7 +443,7 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
     def update_subscription(self, **params):
         requestor = APIClient(self.api_key)
-        url = self.instance_url() + '/subscription'
+        url = self.instance_url() + '/subscriptions'
         response, api_key = requestor.request('post', url, params)
         self.refresh_from({'subscription': response}, api_key, True)
         return self.subscription
@@ -440,6 +465,17 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
         params['customer'] = self.id
         cards = Card.all(self.api_key, **params)
         return cards
+
+    def create_card(self, **params):
+        requestor = APIClient(self.api_key)
+        url = Card.class_url({'customer': self.id})
+        response, api_key = requestor.request('post', url, params)
+        self.refresh_from({'card': response}, api_key, True)
+        return self.card
+
+    def retrieve_charge(self, **params):
+        charge = openpay.Charge.retrieve(params.get('charge'), customer=self.id)
+        return charge
 
 
 class Invoice(CreateableAPIResource, ListableAPIResource,
