@@ -153,7 +153,7 @@ class BaseObject(dict):
         return json.dumps(self, sort_keys=True, indent=2)
 
     @property
-    def stripe_id(self):
+    def openapay_id(self):
         return self.id
 
 
@@ -461,17 +461,18 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
         _, api_key = requestor.request('delete', url)
         self.refresh_from({'discount': None}, api_key, True)
 
-    def cards(self, **params):
-        params['customer'] = self.id
-        cards = Card.all(self.api_key, **params)
-        return cards
+    @property
+    def cards(self):
+        data = {
+            'object': 'list',
+            'url': Card.class_url({'customer': self.id}),
+            'count': 0
+        }
 
-    def create_card(self, **params):
-        requestor = APIClient(self.api_key)
-        url = Card.class_url({'customer': self.id})
-        response, api_key = requestor.request('post', url, params)
-        self.refresh_from({'card': response}, api_key, True)
-        return self.card
+        if not hasattr(self, '_cards'):
+            self._cards = convert_to_openpay_object(data, self.api_key)
+
+        return self._cards
 
     def retrieve_charge(self, **params):
         charge = openpay.Charge.retrieve(params.get('charge'), customer=self.id)
