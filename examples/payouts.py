@@ -11,11 +11,8 @@ openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 
 customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
 
-print "Listing bank accounts for {0}".format(customer.name)
-print customer.bank_accounts.all()
+bank_account = customer.bank_accounts.all()[0] # We get the first account
+# print customer.payouts.create(method='bank_account', destination_id=bank_account.id, amount="100", description="First payout", order_id="oid-00058")
 
-print "Creating account"
-print customer.bank_accounts.create(clabe="032180000118359719", alias="Cuenta principal", holder_name="Carlos Alberto Aguilar")
-
-print "Listing bank accounts for {0}".format(customer.name)
-print customer.bank_accounts.all()
+print "Retrieving payout with ID: tbs6a7g4pypww4eq640d"
+print customer.payouts.retrieve("tbs6a7g4pypww4eq640d")

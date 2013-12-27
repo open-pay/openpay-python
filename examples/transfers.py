@@ -11,11 +11,4 @@ openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 
 customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
 
-print "Listing bank accounts for {0}".format(customer.name)
-print customer.bank_accounts.all()
-
-print "Creating account"
-print customer.bank_accounts.create(clabe="032180000118359719", alias="Cuenta principal", holder_name="Carlos Alberto Aguilar")
-
-print "Listing bank accounts for {0}".format(customer.name)
-print customer.bank_accounts.all()
+print customer.transfers.all()
