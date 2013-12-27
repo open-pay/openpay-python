@@ -152,6 +152,43 @@ Get specific transfer
 transfer2 = customer.transfers.retrieve(transfer1.id)
 ```
 
+##### Plan #####
+
+Create new plan
+
+```python
+plan = openpay.Plan.create(
+    amount=150.00, 
+    status_after_retry="cancelled", 
+    retry_times=2,
+    name="Curso de Ingles", 
+    repeat_unit="month", 
+    trial_days=30, 
+    repeat_every=1
+)
+```
+
+Get specific plan
+
+```python
+plan2 = openpay.Plan.retrieve(plan.id)
+```
+
+Update a plan
+
+```python
+plan = openpay.Plan.retrieve('pbkliysxavp8bvvp8f0k')
+plan.name="Curso de Ingles II"
+plan.save()
+```
+
+Delete plan
+
+```python
+plan = openpay.Plan.retrieve('pbkliysxavp8bvvp8f0k')
+plan.delete()
+```
+
 #### Error handling ####
 
 The Openpay API generates several types of errors depending on the situation,
