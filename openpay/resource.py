@@ -417,6 +417,33 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         response, api_key = requestor.request('get', url, params)
         return convert_to_openpay_object(response, api_key)
 
+    @classmethod
+    def create_charge_as_merchant(cls, **params):
+        """
+        Create a new charge as merchant:
+
+        Required params:
+
+        `source_id`: card id from registered cards
+
+        `method`: possible values ['card', 'bank_account']
+
+        `amount`: The charge amount
+
+        `description`: Charge description
+
+        `order_id`: Unique between all transactions 
+        """
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = APIClient(api_key)
+        url = cls.class_url()
+        response, api_key = requestor.request('post', url, params)
+        return convert_to_openpay_object(response, api_key)
+
 
 class Customer(CreateableAPIResource, UpdateableAPIResource,
                ListableAPIResource, DeletableAPIResource):
@@ -474,9 +501,39 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
         return self._cards
 
+    @property
+    def transfers(self):
+        data = {
+            'object': 'list',
+            'url': Transfer.class_url({'customer': self.id}),
+            'count': 0
+        }
+
+        if not hasattr(self, '_transfers'):
+            self._transfers = convert_to_openpay_object(data, self.api_key)
+
+        return self._transfers
+
     def retrieve_charge(self, **params):
         charge = openpay.Charge.retrieve(params.get('charge'), customer=self.id)
         return charge
+
+    @property
+    def bank_accounts(self):
+        data = {
+            'object': 'list',
+            'url': BankAccount.class_url({'customer': self.id}),
+            'count': 0
+        }
+
+        if not hasattr(self, '_back_accounts'):
+            self._back_accounts = convert_to_openpay_object(data, self.api_key)
+
+        return self._back_accounts
+
+    def create_charge(self, **params):
+        params['customer'] = self.id
+        return openpay.Charge.create(**params)
 
 
 class Invoice(CreateableAPIResource, ListableAPIResource,
@@ -540,3 +597,6 @@ class ApplicationFee(ListableAPIResource):
         url = self.instance_url() + '/refund'
         self.refresh_from(self.request('post', url, params))
         return self
+
+class BankAccount(CreateableAPIResource, UpdateableAPIResource, DeletableAPIResource, ListableAPIResource):
+    pass

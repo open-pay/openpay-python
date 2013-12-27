@@ -21,7 +21,7 @@ openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 # plans = openpay.Plan.all()
 # print plans
 customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
-# print customer.create_card(
+# print customer.cards.create(
 # 	card_number="4111111111111111",
 # 	holder_name="Juan Perez Ramirez",
 # 	expiration_year="20",
