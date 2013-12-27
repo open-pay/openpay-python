@@ -12,6 +12,8 @@ openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 
 print "\n Retrieving customer"
 customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
+print customer
+print "\n Retrieving customer cards"
 print customer.cards.all()
 print "Retrieving card with ID: kvxvccpsesm4pwmtgnjb"
 print customer.cards.retrieve('kvxvccpsesm4pwmtgnjb')
