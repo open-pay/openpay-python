@@ -22,7 +22,7 @@ def convert_to_openpay_object(resp, api_key, item_type=None):
              'plan': Plan, 'coupon': Coupon, 'token': Token, 'event': Event,
              'transfer': Transfer, 'list': ListObject, 'recipient': Recipient,
              'card': Card, 'application_fee': ApplicationFee, 'payout': Payout,
-             'bank_account': BankAccount}
+             'bank_account': BankAccount, 'fee': Fee}
 
     if isinstance(resp, list):
         return [convert_to_openpay_object(i, api_key, item_type) for i in resp]
@@ -421,7 +421,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         return convert_to_openpay_object(response, api_key, 'charge')
 
     @classmethod
-    def create_charge_as_merchant(cls, **params):
+    def create_as_merchant(cls, **params):
         """
         Create a new charge as merchant:
 
@@ -435,7 +435,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 
         `description`: Charge description
 
-        `order_id`: Unique between all transactions 
+        `order_id`: Unique between all transactions
         """
         if hasattr(cls, 'api_key'):
             api_key = cls.api_key
@@ -534,7 +534,7 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
         `description`: Charge description
 
-        `order_id`: Unique between all transactions 
+        `order_id`: Unique between all transactions
         """
         data = {
             'object': 'list',
@@ -633,9 +633,54 @@ class ApplicationFee(ListableAPIResource):
         self.refresh_from(self.request('post', url, params))
         return self
 
+
 class BankAccount(CreateableAPIResource, UpdateableAPIResource, DeletableAPIResource, ListableAPIResource):
     pass
 
 
 class Payout(CreateableAPIResource, ListableAPIResource):
+
+    @classmethod
+    def create_as_merchant(cls, **params):
+        """
+        Create a new payout as merchant:
+
+        Required params:
+
+        `method`: possible values ['card', 'bank_account']
+
+        `destination_id`: Bank account or Card ID
+
+        `amount`: The charge amount
+
+        `description`: Charge description
+
+        `order_id`: Unique between all transactions
+        """
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = APIClient(api_key)
+        url = cls.class_url()
+        response, api_key = requestor.request('post', url, params)
+        return convert_to_openpay_object(response, api_key, 'payout')
+
+    @classmethod
+    def retrieve_as_merchant(cls, payout_id):
+        params = {}
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = APIClient(api_key)
+        url = cls.class_url()
+        url = "{0}/{1}".format(url, payout_id)
+        response, api_key = requestor.request('get', url, params)
+        return convert_to_openpay_object(response, api_key, 'payout')
+
+
+class Fee(CreateableAPIResource, ListableAPIResource):
     pass
