@@ -106,6 +106,8 @@ Get all customers
 customers = openpay.Customer.all()
 ```
 
+###### Customer Cards ######
+
 Get all customer cards
 
 ```python
@@ -116,6 +118,38 @@ Get specific customer card
 
 ```python
 card = customer.cards.retrieve('kvxvccpsesm4pwmtgnjb')
+```
+
+Delete a customer card
+
+```python
+card = customer.cards.retrieve('kvxvccpsesm4pwmtgnjb')
+card.delete()
+```
+
+###### Customer Transfers ######
+
+Get all customer transfers (inbound and outbound)
+
+```python
+transfers = customer.transfers.all()
+```
+
+Create a customer transfer
+
+```python
+transfer1 = customer.transfers.create(
+    customer_id="acuqxruyv0hi1wfdwmym", 
+    amount=100, 
+    description="Test transfer", 
+    order_id="oid-00059"
+)
+```
+
+Get specific transfer
+
+```python
+transfer2 = customer.transfers.retrieve(transfer1.id)
 ```
 
 #### Error handling ####
