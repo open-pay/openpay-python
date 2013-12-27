@@ -173,3 +173,52 @@ class OpenpayUnitTestCase(OpenpayTestCase):
 
         for patcher in self.request_patchers.itervalues():
             patcher.stop()
+
+
+class OpenpayApiTestCase(OpenpayTestCase):
+
+    def setUp(self):
+        super(OpenpayApiTestCase, self).setUp()
+
+        self.requestor_patcher = patch('openpay.api.APIClient')
+        requestor_class_mock = self.requestor_patcher.start()
+        self.requestor_mock = requestor_class_mock.return_value
+
+    def tearDown(self):
+        super(StripeApiTestCase, self).tearDown()
+
+        self.requestor_patcher.stop()
+
+    def mock_response(self, res):
+        self.requestor_mock.request = Mock(return_value=(res, 'reskey'))
+
+
+class MyResource(openpay.resource.APIResource):
+    pass
+
+
+class MySingleton(openpay.resource.SingletonAPIResource):
+    pass
+
+
+class MyListable(openpay.resource.ListableAPIResource):
+    pass
+
+
+class MyCreatable(openpay.resource.CreateableAPIResource):
+    pass
+
+
+class MyUpdateable(openpay.resource.UpdateableAPIResource):
+    pass
+
+
+class MyDeletable(openpay.resource.DeletableAPIResource):
+    pass
+
+
+class MyComposite(openpay.resource.ListableAPIResource,
+                  openpay.resource.CreateableAPIResource,
+                  openpay.resource.UpdateableAPIResource,
+                  openpay.resource.DeletableAPIResource):
+    pass
