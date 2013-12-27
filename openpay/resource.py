@@ -244,7 +244,8 @@ class ListableAPIResource(APIResource):
         requestor = APIClient(api_key)
         url = cls.class_url(params)
         response, api_key = requestor.request('get', url, params)
-        return convert_to_openpay_object(response, api_key)
+        klass_name = cls.__name__.lower()
+        return convert_to_openpay_object(response, api_key, klass_name)
 
 
 class CreateableAPIResource(APIResource):
@@ -254,7 +255,8 @@ class CreateableAPIResource(APIResource):
         requestor = APIClient(api_key)
         url = cls.class_url(params)
         response, api_key = requestor.request('post', url, params)
-        return convert_to_openpay_object(response, api_key)
+        klass_name = cls.__name__.lower()
+        return convert_to_openpay_object(response, api_key, klass_name)
 
 
 class UpdateableAPIResource(APIResource):
@@ -434,26 +436,6 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 class Customer(CreateableAPIResource, UpdateableAPIResource,
                ListableAPIResource, DeletableAPIResource):
 
-    def add_invoice_item(self, **params):
-        params['customer'] = self.id
-        ii = InvoiceItem.create(self.api_key, **params)
-        return ii
-
-    def invoices(self, **params):
-        params['customer'] = self.id
-        invoices = Invoice.all(self.api_key, **params)
-        return invoices
-
-    def invoice_items(self, **params):
-        params['customer'] = self.id
-        iis = InvoiceItem.all(self.api_key, **params)
-        return iis
-
-    def charges(self, **params):
-        params['customer'] = self.id
-        charges = Charge.all(self.api_key, **params)
-        return charges
-
     def update_subscription(self, **params):
         requestor = APIClient(self.api_key)
         url = self.instance_url() + '/subscriptions'
@@ -487,6 +469,15 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
             self._cards = convert_to_openpay_object(data, self.api_key)
 
         return self._cards
+
+    @property
+    def charges(self):
+        data = {
+            'object': 'list',
+            'url': Charge.class_url({'customer': self.id}),
+            'count': 0,
+            'item_type': 'charge'
+        }
 
     @property
     def transfers(self):
@@ -531,10 +522,6 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
         return self._payouts
 
-    def retrieve_charge(self, **params):
-        charge = openpay.Charge.retrieve(params.get('charge'), customer=self.id)
-        return charge
-
     @property
     def bank_accounts(self):
         data = {
@@ -548,10 +535,6 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
             self._back_accounts = convert_to_openpay_object(data, self.api_key)
 
         return self._back_accounts
-
-    def create_charge(self, **params):
-        params['customer'] = self.id
-        return openpay.Charge.create(**params)
 
 
 class Plan(CreateableAPIResource, DeletableAPIResource,
