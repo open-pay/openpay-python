@@ -16,18 +16,21 @@ from openpay.api import APIClient
 from openpay.util import utf8, logger
 
 
-def convert_to_openpay_object(resp, api_key):
+def convert_to_openpay_object(resp, api_key, item_type=None):
     types = {'charge': Charge, 'customer': Customer,
              'invoice': Invoice, 'invoiceitem': InvoiceItem,
              'plan': Plan, 'coupon': Coupon, 'token': Token, 'event': Event,
              'transfer': Transfer, 'list': ListObject, 'recipient': Recipient,
-             'card': Card, 'application_fee': ApplicationFee}
+             'card': Card, 'application_fee': ApplicationFee, 'payout': Payout,
+             'bank_account': BankAccount}
 
     if isinstance(resp, list):
-        return [convert_to_openpay_object(i, api_key) for i in resp]
+        return [convert_to_openpay_object(i, api_key, item_type) for i in resp]
     elif isinstance(resp, dict) and not isinstance(resp, BaseObject):
         resp = resp.copy()
         klass_name = resp.get('object')
+        if not klass_name and item_type:
+            klass_name = item_type
         if isinstance(klass_name, basestring):
             klass = types.get(klass_name, BaseObject)
         else:
@@ -135,7 +138,7 @@ class BaseObject(dict):
         requestor = APIClient(self.api_key)
         response, api_key = requestor.request(method, url, params)
 
-        return convert_to_openpay_object(response, api_key)
+        return convert_to_openpay_object(response, api_key, self.get('item_type'))
 
     def __repr__(self):
         ident_parts = [type(self).__name__]
@@ -401,7 +404,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         requestor = APIClient(api_key)
         url = cls.class_url()
         response, api_key = requestor.request('get', url, params)
-        return convert_to_openpay_object(response, api_key)
+        return convert_to_openpay_object(response, api_key, 'charge')
 
     @classmethod
     def retrieve_as_merchant(cls, charge_id):
@@ -415,7 +418,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         url = cls.class_url()
         url = "{0}/{1}".format(url, charge_id)
         response, api_key = requestor.request('get', url, params)
-        return convert_to_openpay_object(response, api_key)
+        return convert_to_openpay_object(response, api_key, 'charge')
 
     @classmethod
     def create_charge_as_merchant(cls, **params):
@@ -442,7 +445,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         requestor = APIClient(api_key)
         url = cls.class_url()
         response, api_key = requestor.request('post', url, params)
-        return convert_to_openpay_object(response, api_key)
+        return convert_to_openpay_object(response, api_key, 'charge')
 
 
 class Customer(CreateableAPIResource, UpdateableAPIResource,
@@ -493,7 +496,8 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
         data = {
             'object': 'list',
             'url': Card.class_url({'customer': self.id}),
-            'count': 0
+            'count': 0,
+            'item_type': 'card'
         }
 
         if not hasattr(self, '_cards'):
@@ -506,13 +510,43 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
         data = {
             'object': 'list',
             'url': Transfer.class_url({'customer': self.id}),
-            'count': 0
+            'count': 0,
+            'item_type': 'transfer'
         }
 
         if not hasattr(self, '_transfers'):
             self._transfers = convert_to_openpay_object(data, self.api_key)
 
         return self._transfers
+
+    @property
+    def payouts(self):
+        """
+        Create a new payout as customer:
+
+        Required params:
+
+        `method`: possible values ['card', 'bank_account']
+
+        `destination_id`: Bank account or Card ID
+
+        `amount`: The charge amount
+
+        `description`: Charge description
+
+        `order_id`: Unique between all transactions 
+        """
+        data = {
+            'object': 'list',
+            'url': Payout.class_url({'customer': self.id}),
+            'count': 0,
+            'item_type': 'payout'
+        }
+
+        if not hasattr(self, '_payouts'):
+            self._payouts = convert_to_openpay_object(data, self.api_key)
+
+        return self._payouts
 
     def retrieve_charge(self, **params):
         charge = openpay.Charge.retrieve(params.get('charge'), customer=self.id)
@@ -523,7 +557,8 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
         data = {
             'object': 'list',
             'url': BankAccount.class_url({'customer': self.id}),
-            'count': 0
+            'count': 0,
+            'item_type': 'bank_account'
         }
 
         if not hasattr(self, '_back_accounts'):
@@ -547,7 +582,7 @@ class Invoice(CreateableAPIResource, ListableAPIResource,
         requestor = APIClient(self.api_key)
         url = cls.class_url() + '/upcoming'
         response, api_key = requestor.request('get', url, params)
-        return convert_to_openpay_object(response, api_key)
+        return convert_to_openpay_object(response, api_key, 'invoice')
 
 
 class InvoiceItem(CreateableAPIResource, UpdateableAPIResource,
@@ -599,4 +634,8 @@ class ApplicationFee(ListableAPIResource):
         return self
 
 class BankAccount(CreateableAPIResource, UpdateableAPIResource, DeletableAPIResource, ListableAPIResource):
+    pass
+
+
+class Payout(CreateableAPIResource, ListableAPIResource):
     pass
