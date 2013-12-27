@@ -18,10 +18,8 @@ from openpay.util import utf8, logger
 
 def convert_to_openpay_object(resp, api_key, item_type=None):
     types = {'charge': Charge, 'customer': Customer,
-             'invoice': Invoice, 'invoiceitem': InvoiceItem,
-             'plan': Plan, 'coupon': Coupon, 'token': Token, 'event': Event,
-             'transfer': Transfer, 'list': ListObject, 'recipient': Recipient,
-             'card': Card, 'application_fee': ApplicationFee, 'payout': Payout,
+             'plan': Plan, 'transfer': Transfer, 'list': ListObject,
+             'card': Card, 'payout': Payout,
              'bank_account': BankAccount, 'fee': Fee}
 
     if isinstance(resp, list):
@@ -314,21 +312,6 @@ class DeletableAPIResource(APIResource):
 # API objects
 
 
-class Account(SingletonAPIResource):
-    pass
-
-
-class Balance(SingletonAPIResource):
-    pass
-
-
-class BalanceTransaction(ListableAPIResource):
-
-    @classmethod
-    def class_url(cls):
-        return '/v1/balance/history'
-
-
 class Card(ListableAPIResource, UpdateableAPIResource, DeletableAPIResource):
 
     @classmethod
@@ -571,67 +554,14 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
         return openpay.Charge.create(**params)
 
 
-class Invoice(CreateableAPIResource, ListableAPIResource,
-              UpdateableAPIResource):
-
-    def pay(self):
-        return self.request('post', self.instance_url() + '/pay', {})
-
-    @classmethod
-    def upcoming(cls, api_key=None, **params):
-        requestor = APIClient(self.api_key)
-        url = cls.class_url() + '/upcoming'
-        response, api_key = requestor.request('get', url, params)
-        return convert_to_openpay_object(response, api_key, 'invoice')
-
-
-class InvoiceItem(CreateableAPIResource, UpdateableAPIResource,
-                  ListableAPIResource, DeletableAPIResource):
-    pass
-
-
 class Plan(CreateableAPIResource, DeletableAPIResource,
            UpdateableAPIResource, ListableAPIResource):
-    pass
-
-
-class Token(CreateableAPIResource):
-    pass
-
-
-class Coupon(CreateableAPIResource, DeletableAPIResource,
-             ListableAPIResource):
-    pass
-
-
-class Event(ListableAPIResource):
     pass
 
 
 class Transfer(CreateableAPIResource, UpdateableAPIResource,
                ListableAPIResource):
     pass
-
-
-class Recipient(CreateableAPIResource, UpdateableAPIResource,
-                ListableAPIResource, DeletableAPIResource):
-
-    def transfers(self, **params):
-        params['recipient'] = self.id
-        transfers = Transfer.all(self.api_key, **params)
-        return transfers
-
-
-class ApplicationFee(ListableAPIResource):
-
-    @classmethod
-    def class_name(cls):
-        return 'application_fee'
-
-    def refund(self, **params):
-        url = self.instance_url() + '/refund'
-        self.refresh_from(self.request('post', url, params))
-        return self
 
 
 class BankAccount(CreateableAPIResource, UpdateableAPIResource, DeletableAPIResource, ListableAPIResource):

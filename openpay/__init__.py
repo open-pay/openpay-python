@@ -15,9 +15,8 @@ verify_ssl_certs = True
 
 # Resource
 from openpay.resource import (  # noqa
-    Account, Balance, BalanceTransaction, Card, Charge, Customer, Invoice,
-    InvoiceItem, Plan, Token, Coupon, Event, Transfer, Recipient,
-    ApplicationFee, Fee, BankAccount, Payout)
+    Card, Charge, Customer, Plan, Transfer,
+    Fee, BankAccount, Payout)
 
 # Error imports.  Note that we may want to move these out of the root
 # namespace in the future and you should prefer to access them via
@@ -29,7 +28,7 @@ from openpay.error import (  # noqa
 
 
 from openpay.resource import (
-	convert_to_openpay_object, BaseObject, APIResource)
+    convert_to_openpay_object, BaseObject, APIResource)
 from openpay.util import logger
 
 import sys as _sys
@@ -48,9 +47,9 @@ _original_module = _sys.modules[__name__]
 
 
 def get_api_base():
-	if not production:
-	    api_base = "https://sandbox-api.openpay.mx"
-	else:
-	    api_base = "https://api.openpay.mx"
+    if not production:
+        api_base = "https://sandbox-api.openpay.mx"
+    else:
+        api_base = "https://api.openpay.mx"
 
-	return api_base
+    return api_base
