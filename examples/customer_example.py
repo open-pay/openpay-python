@@ -17,3 +17,20 @@ print "\n Retrieving customer cards"
 print customer.cards.all()
 print "Retrieving card with ID: kvxvccpsesm4pwmtgnjb"
 print customer.cards.retrieve('kvxvccpsesm4pwmtgnjb')
+# print "\nCreating new customer"
+# customer = openpay.Customer.create(
+#     name="Juan",
+#     email="somebody@example.com",
+#     address={
+#         "city": "Queretaro",
+#         "state":"Queretaro",
+#         "line1":"Calle de las penas no 10",
+#         "postal_code":"76000",
+#         "line2":"col. san pablo",
+#         "line3":"entre la calle de la alegria y la calle del llanto",
+#         "country_code":"MX"
+#     },
+#     last_name="Perez",
+#     phone_number="44209087654"
+# )
+print openpay.Customer.all()
