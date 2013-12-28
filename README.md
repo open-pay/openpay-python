@@ -152,6 +152,30 @@ Get specific transfer
 transfer2 = customer.transfers.retrieve(transfer1.id)
 ```
 
+###### Bank Accounts ######
+
+Add bank account to customer
+
+```python
+bank_account = customer.bank_accounts.create(
+    clabe="032180000118359719", 
+    alias="Cuenta principal", 
+    holder_name="Juan Perez"
+)
+```
+
+Get all customer bank accounts
+
+```python
+accounts = customer.bank_accounts.all()
+```
+
+Get specific bank account
+
+```python
+account = customer.back_accounts.retrieve("bsbg7igxh3yukpu8t2q4")
+```
+
 ##### Plan #####
 
 Create new plan
