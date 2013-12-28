@@ -10,9 +10,8 @@ except ImportError:
 
 import copy
 import urllib
-import requests
 import openpay
-from openpay.api import APIClient
+from openpay import api
 from openpay.util import utf8, logger
 
 
@@ -133,7 +132,7 @@ class BaseObject(dict):
         if params is None:
             params = self._retrieve_params
 
-        requestor = APIClient(self.api_key)
+        requestor = api.APIClient(self.api_key)
         response, api_key = requestor.request(method, url, params)
 
         return convert_to_openpay_object(response, api_key, self.get('item_type'))
@@ -230,7 +229,7 @@ class SingletonAPIResource(APIResource):
     def class_url(cls):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
-        return "/v1/{0}/{1}s".format(merchant_id, cls_name)
+        return "/v1/{0}/{1}".format(merchant_id, cls_name)
 
     def instance_url(self):
         return self.class_url()
@@ -241,7 +240,7 @@ class ListableAPIResource(APIResource):
 
     @classmethod
     def all(cls, api_key=None, **params):
-        requestor = APIClient(api_key)
+        requestor = api.APIClient(api_key)
         url = cls.class_url(params)
         response, api_key = requestor.request('get', url, params)
         klass_name = cls.__name__.lower()
@@ -252,7 +251,7 @@ class CreateableAPIResource(APIResource):
 
     @classmethod
     def create(cls, api_key=None, **params):
-        requestor = APIClient(api_key)
+        requestor = api.APIClient(api_key)
         url = cls.class_url(params)
         response, api_key = requestor.request('post', url, params)
         klass_name = cls.__name__.lower()
@@ -365,14 +364,14 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         return self
 
     def update_dispute(self, **params):
-        requestor = APIClient(self.api_key)
+        requestor = api.APIClient(self.api_key)
         url = self.instance_url() + '/dispute'
         response, api_key = requestor.request('post', url, params)
         self.refresh_from({'dispute': response}, api_key, True)
         return self.dispute
 
     def close_dispute(self):
-        rrequestor = APIClient(self.api_key)
+        rrequestor = api.APIClient(self.api_key)
         url = self.instance_url() + '/dispute/close'
         response, api_key = requestor.request('post', url, {})
         self.refresh_from({'dispute': response}, api_key, True)
@@ -386,7 +385,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         else:
             api_key = openpay.api_key
 
-        requestor = APIClient(api_key)
+        requestor = api.APIClient(api_key)
         url = cls.class_url()
         response, api_key = requestor.request('get', url, params)
         return convert_to_openpay_object(response, api_key, 'charge')
@@ -399,7 +398,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         else:
             api_key = openpay.api_key
 
-        requestor = APIClient(api_key)
+        requestor = api.APIClient(api_key)
         url = cls.class_url()
         url = "{0}/{1}".format(url, charge_id)
         response, api_key = requestor.request('get', url, params)
@@ -427,7 +426,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         else:
             api_key = openpay.api_key
 
-        requestor = APIClient(api_key)
+        requestor = api.APIClient(api_key)
         url = cls.class_url()
         response, api_key = requestor.request('post', url, params)
         return convert_to_openpay_object(response, api_key, 'charge')
@@ -437,21 +436,21 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
                ListableAPIResource, DeletableAPIResource):
 
     def update_subscription(self, **params):
-        requestor = APIClient(self.api_key)
+        requestor = api.APIClient(self.api_key)
         url = self.instance_url() + '/subscriptions'
         response, api_key = requestor.request('post', url, params)
         self.refresh_from({'subscription': response}, api_key, True)
         return self.subscription
 
     def cancel_subscription(self, **params):
-        requestor = APIClient(self.api_key)
+        requestor = api.APIClient(self.api_key)
         url = self.instance_url() + '/subscription'
         response, api_key = requestor.request('delete', url, params)
         self.refresh_from({'subscription': response}, api_key, True)
         return self.subscription
 
     def delete_discount(self, **params):
-        requestor = APIClient(self.api_key)
+        requestor = api.APIClient(self.api_key)
         url = self.instance_url() + '/discount'
         _, api_key = requestor.request('delete', url)
         self.refresh_from({'discount': None}, api_key, True)
@@ -575,7 +574,7 @@ class Payout(CreateableAPIResource, ListableAPIResource):
         else:
             api_key = openpay.api_key
 
-        requestor = APIClient(api_key)
+        requestor = api.APIClient(api_key)
         url = cls.class_url()
         response, api_key = requestor.request('post', url, params)
         return convert_to_openpay_object(response, api_key, 'payout')
@@ -588,7 +587,7 @@ class Payout(CreateableAPIResource, ListableAPIResource):
         else:
             api_key = openpay.api_key
 
-        requestor = APIClient(api_key)
+        requestor = api.APIClient(api_key)
         url = cls.class_url()
         url = "{0}/{1}".format(url, payout_id)
         response, api_key = requestor.request('get', url, params)
