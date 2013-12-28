@@ -181,7 +181,7 @@ class APIResource(BaseObject):
     def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
-        if params and params.get('customer') is not None:
+        if params and 'customer' in params.keys():
             return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
@@ -313,13 +313,13 @@ class DeletableAPIResource(APIResource):
 # API objects
 
 
-class Card(ListableAPIResource, UpdateableAPIResource, DeletableAPIResource):
+class Card(ListableAPIResource, UpdateableAPIResource, DeletableAPIResource, CreateableAPIResource):
 
     @classmethod
     def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
-        if params:
+        if params and 'customer' in params.keys():
             return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
@@ -355,13 +355,13 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 
     def instance_url(self):
         self.id = utf8(self.id)
-        self.customer = utf8(self.customer_id)
 
         if self._as_merchant:
             base = Charge.class_url()
             extn = urllib.quote_plus(self.id)
-            url = "{0}/charges/{1}".format(base, extn)
+            url = "{0}/{1}".format(base, extn)
         else:
+            self.customer = utf8(self.customer_id)
             base = Customer.class_url()
             cust_extn = urllib.quote_plus(self.customer)
             extn = urllib.quote_plus(self.id)
@@ -374,6 +374,8 @@ class Charge(CreateableAPIResource, ListableAPIResource,
             self._as_merchant = True
         else:
             self._as_merchant = False
+
+        del params['merchant']
         url = self.instance_url() + '/refund'
         self.refresh_from(self.request('post', url, params))
         return self
@@ -383,6 +385,8 @@ class Charge(CreateableAPIResource, ListableAPIResource,
             self._as_merchant = True
         else:
             self._as_merchant = False
+
+        del params['merchant']
         url = self.instance_url() + '/capture'
         self.refresh_from(self.request('post', url, params))
         return self
