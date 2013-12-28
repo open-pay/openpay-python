@@ -176,6 +176,33 @@ Get specific bank account
 account = customer.back_accounts.retrieve("bsbg7igxh3yukpu8t2q4")
 ```
 
+###### Payouts ######
+
+Add payout for customer
+
+```python
+bank_account = customer.bank_accounts.all()[0]  # We get the first account
+customer.payouts.create(
+    method='bank_account',   # possible values ['bank_accunt', 'card']
+    destination_id=bank_account.id, 
+    amount="100", 
+    description="First payout", 
+    order_id="oid-00058"
+)
+```
+
+Get all payouts
+
+```python
+customer.payouts.all()
+```
+
+Get specific payout
+
+```python
+customer.payouts.retrieve("tbs6a7g4pypww4eq640d")
+```
+
 ##### Plan #####
 
 Create new plan
