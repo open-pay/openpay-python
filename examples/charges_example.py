@@ -26,6 +26,11 @@ print "\n\nRetrieving Charge for customer {0} with ID: teh5ydydhg4he8ympogf".for
 charge = customer.charges.retrieve('teh5ydydhg4he8ympogf')
 print charge
 
-print "Creating a charge"
-charge = customer.charges.create(source_id="kvxvccpsesm4pwmtgnjb", method="card", amount=100, description="Second charge", order_id="oid-00057")
-print charge
+# print "Creating a charge"
+# charge = customer.charges.create(source_id="kvxvccpsesm4pwmtgnjb", method="card", amount=100, description="Third charge", order_id="oid-00060", capture=False)
+# print charge
+
+print "Get charge with ID: t2chepfmcfhr0uwqqmrp"
+charge = customer.charges.retrieve('t2chepfmcfhr0uwqqmrp')
+#charge.capture()
+print charge.refund()
