@@ -63,5 +63,14 @@ print "Retrieve charge with ID: t2uizz6lefdpj20kvucs as merchant"
 charge = openpay.Charge.retrieve_as_merchant("t2uizz6lefdpj20kvucs")
 # print "Capturing charge"
 # print charge.capture(merchant=True)
-print "Refund charge"
-print charge.refund(merchant=True)
+# print "Refund charge"
+# print charge.refund(merchant=True)
+
+# No hay acceso como merchant para agregar cuentas de banco
+# print "Creating bank account as merchant"
+# account = openpay.BankAccount.create(clabe="012298026516924616", alias="Cuenta principal", holder_name="Carlos Alberto Aguilar")
+# print account
+
+print "Creating charge as merchant"
+charge = openpay.Charge.create_as_merchant(method="bank_account", amount=100, description="Fifth charge", order_id="oid-00062")
+print charge
