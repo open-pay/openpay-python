@@ -68,25 +68,19 @@ class APIClient(object):
         return resp, my_api_key
 
     def handle_api_error(self, rbody, rcode, resp):
-        try:
-            err = resp['error']
-        except (KeyError, TypeError):
-            raise error.APIError(
-                "Invalid response object from API: %r (HTTP response code "
-                "was %d)" % (rbody, rcode),
-                rbody, rcode, resp)
+        err = resp
 
-            if rcode in [400, 404]:
-                raise error.InvalidRequestError(
-                    err.get('message'), err.get('param'), rbody, rcode, resp)
-            elif rcode == 401:
-                raise error.AuthenticationError(
-                    err.get('message'), rbody, rcode, resp)
-            elif rcode == 402:
-                raise error.CardError(err.get('message'), err.get('param'),
-                                      err.get('code'), rbody, rcode, resp)
-            else:
-                raise error.APIError(err.get('message'), rbody, rcode, resp)
+        if rcode in [400, 404]:
+            raise error.InvalidRequestError(
+                err.get('description'), err.get('request_id'), rbody, rcode, resp)
+        elif rcode == 401:
+            raise error.AuthenticationError(
+                err.get('description'), rbody, rcode, resp)
+        elif rcode == 402:
+            raise error.CardError(err.get('description'), err.get('request_id'),
+                                  err.get('error_code'), rbody, rcode, resp)
+        else:
+            raise error.APIError(err.get('description'), rbody, rcode, resp)
 
     def request_raw(self, method, url, params=None):
         """
