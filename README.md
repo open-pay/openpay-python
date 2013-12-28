@@ -189,6 +189,25 @@ plan = openpay.Plan.retrieve('pbkliysxavp8bvvp8f0k')
 plan.delete()
 ```
 
+##### Fee #####
+
+You may charge a fee as follows:
+
+```python
+fee = openpay.Fee.create(
+    customer_id="amce5ycvwycfzyarjf8l",
+    amount=12.50,
+    description="Fee Charge",
+    order_id="oid=1245"
+)
+````
+
+List all charged fees
+
+```python
+fees = openpay.Fee.all()
+```
+
 #### Error handling ####
 
 The Openpay API generates several types of errors depending on the situation,
