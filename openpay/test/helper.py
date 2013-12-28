@@ -50,8 +50,9 @@ DUMMY_RECIPIENT = {
 
 DUMMY_TRANSFER = {
     'amount': 400,
-    'currency': 'usd',
-    'recipient': 'self'
+    'customer_id': 'acuqxruyv0hi1wfdwmym',
+    'description': 'Dummy Transfer',
+    'order_id': 'oid-00099',
 }
 
 DUMMY_INVOICE_ITEM = {
@@ -124,6 +125,8 @@ class OpenpayTestCase(unittest.TestCase):
             openpay.api_base = api_base
         openpay.api_key = os.environ.get(
             'OPENPAY_API_KEY', 'tGN0bIwXnHdwOa85VABjPdSn8nWY7G7I')
+        openpay.verify_ssl_certs = False
+        openpay.merchant_id = "xxxxxxxxxxxxxxxxxxxx"
 
     def tearDown(self):
         super(OpenpayTestCase, self).tearDown()
@@ -185,7 +188,7 @@ class OpenpayApiTestCase(OpenpayTestCase):
         self.requestor_mock = requestor_class_mock.return_value
 
     def tearDown(self):
-        super(StripeApiTestCase, self).tearDown()
+        super(OpenpayApiTestCase, self).tearDown()
 
         self.requestor_patcher.stop()
 
