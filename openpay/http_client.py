@@ -11,6 +11,7 @@ from openpay import error, util
 # - Fall back to urllib2 with a warning if needed
 try:
     import urllib2
+    import base64
 except ImportError:
     pass
 
@@ -54,7 +55,7 @@ class HTTPClient(object):
     def __init__(self, verify_ssl_certs=True):
         self._verify_ssl_certs = verify_ssl_certs
 
-    def request(self, method, url, headers, post_data=None):
+    def request(self, method, url, headers, post_data=None, user=None):
         raise NotImplementedError(
             'HTTPClient subclasses must implement `request`')
 
@@ -130,4 +131,35 @@ class PycurlClient(HTTPClient):
 
 
 class Urllib2Client(HTTPClient):
-    pass
+    if sys.version_info >= (3, 0):
+        name = 'urllib.request'
+    else:
+        name = 'urllib2'
+
+    def request(self, method, url, headers, post_data=None, user=None):
+        if sys.version_info >= (3, 0) and isinstance(post_data, basestring):
+            post_data = post_data.encode('utf-8')
+
+        req = urllib2.Request(url, post_data, headers)
+        base64string = base64.encodestring('%s:%s' % (user, '')).replace('\n', '')
+        req.add_header("Authorization", "Basic %s" % base64string)
+
+        if method not in ('get', 'post'):
+            req.get_method = lambda: method.upper()
+
+        try:
+            response = urllib2.urlopen(req)
+            rbody = response.read()
+            rcode = response.code
+        except urllib2.HTTPError, e:
+            rcode = e.code
+            rbody = e.read()
+        except (urllib2.URLError, ValueError), e:
+            self._handle_request_error(e)
+        return rbody, rcode
+
+    def _handle_request_error(self, e):
+        msg = ("Unexpected error communicating with Openpay. "
+               "If this problem persists, let us know at support@openpay.mx.")
+        msg = textwrap.fill(msg) + "\n\n(Network error: " + str(e) + ")"
+        raise error.APIConnectionError(msg)
