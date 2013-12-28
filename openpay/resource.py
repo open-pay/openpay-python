@@ -11,7 +11,7 @@ except ImportError:
 import copy
 import urllib
 import openpay
-from openpay import api
+from openpay import api, error
 from openpay.util import utf8, logger
 
 
@@ -348,7 +348,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
     def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
-        if params:
+        if params and 'customer' in params.keys():
             return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
@@ -356,7 +356,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
     def instance_url(self):
         self.id = utf8(self.id)
 
-        if self._as_merchant:
+        if hasattr(self, '_as_merchant'):
             base = Charge.class_url()
             extn = urllib.quote_plus(self.id)
             url = "{0}/{1}".format(base, extn)
@@ -423,16 +423,17 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         return convert_to_openpay_object(response, api_key, 'charge')
 
     @classmethod
-    def retrieve_as_merchant(cls, charge_id):
+    def retrieve_as_merchant(cls, id):
         params = {}
         if hasattr(cls, 'api_key'):
             api_key = cls.api_key
         else:
             api_key = openpay.api_key
 
+        cls._as_merchant = True
         requestor = api.APIClient(api_key)
         url = cls.class_url()
-        url = "{0}/{1}".format(url, charge_id)
+        url = "{0}/{1}".format(url, id)
         response, api_key = requestor.request('get', url, params)
         return convert_to_openpay_object(response, api_key, 'charge')
 
