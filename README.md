@@ -176,6 +176,20 @@ Get specific bank account
 account = customer.back_accounts.retrieve("bsbg7igxh3yukpu8t2q4")
 ```
 
+###### Subscriptions ######
+
+Add subscription to customer
+
+```python
+customer.update_subscription(plan_id="pbkliysxavp8bvvp8f0k", trial_days="5", card_id="kvxvccpsesm4pwmtgnjb")
+```
+
+Cancel subscription
+
+```python
+customer.cancel_subscription()
+```
+
 ###### Payouts ######
 
 Add payout for customer
