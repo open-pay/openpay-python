@@ -8,7 +8,7 @@ openpay.api_key = "sk_10d37cc4da8e4ffd902cdf62e37abd1b"
 openpay.verify_ssl_certs = False
 openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
-charges = customer.charges()
+charges = customer.charges.all()
 print "\n\nCharges for customer: {0}".format(customer.name)
 for charge in charges:
 	print charge
@@ -23,9 +23,9 @@ charge = openpay.Charge.retrieve_as_merchant('t8vgbjfy4vdx3xttigyj')
 print charge
 
 print "\n\nRetrieving Charge for customer {0} with ID: teh5ydydhg4he8ympogf".format(customer.name)
-charge = customer.retrieve_charge(charge='teh5ydydhg4he8ympogf')
+charge = customer.charges.retrieve('teh5ydydhg4he8ympogf')
 print charge
 
 print "Creating a charge"
-charge = customer.create_charge(source_id="kvxvccpsesm4pwmtgnjb", method="card", amount=100, description="Second charge", order_id="oid-00056")
+charge = customer.charges.create(source_id="kvxvccpsesm4pwmtgnjb", method="card", amount=100, description="Second charge", order_id="oid-00057")
 print charge

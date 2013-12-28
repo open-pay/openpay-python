@@ -379,6 +379,10 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 
     @classmethod
     def as_merchant(cls):
+        """
+        Get a list of all charges as a merchant
+        """
+
         params = {}
         if hasattr(cls, 'api_key'):
             api_key = cls.api_key
@@ -444,7 +448,7 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
     def cancel_subscription(self, **params):
         requestor = api.APIClient(self.api_key)
-        url = self.instance_url() + '/subscription'
+        url = self.instance_url() + '/subscriptions'
         response, api_key = requestor.request('delete', url, params)
         self.refresh_from({'subscription': response}, api_key, True)
         return self.subscription
@@ -477,6 +481,11 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
             'count': 0,
             'item_type': 'charge'
         }
+
+        if not hasattr(self, '_charges'):
+            self._charges = convert_to_openpay_object(data, self.api_key)
+
+        return self._charges
 
     @property
     def transfers(self):
