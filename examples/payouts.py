@@ -16,3 +16,6 @@ bank_account = customer.bank_accounts.all()[0] # We get the first account
 
 print "Retrieving payout with ID: tbs6a7g4pypww4eq640d"
 print customer.payouts.retrieve("tbs6a7g4pypww4eq640d")
+
+print "Creating payout as merchant"
+print openpay.Payout.create_as_merchant(method="bank_account", destination_id="bkjj51ovzkv2tr1mn0n8", amount=200.00, description="Second payout", order_id="oid-00064")
