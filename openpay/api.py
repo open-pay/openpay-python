@@ -80,7 +80,7 @@ class APIClient(object):
             raise error.CardError(err.get('description'), err.get('request_id'),
                                   err.get('error_code'), rbody, rcode, resp)
         else:
-            raise error.APIError(err.get('description'), rbody, rcode, resp)
+            raise error.APIError("{0}, error code: {1}".format(err.get('description'), resp['error_code']), rbody, rcode, resp)
 
     def request_raw(self, method, url, params=None):
         """
