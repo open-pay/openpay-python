@@ -14,7 +14,7 @@ import openpay
 from openpay.test.helper import (
     OpenpayTestCase,
     NOW, DUMMY_CARD, DUMMY_CHARGE, DUMMY_PLAN, DUMMY_COUPON,
-    DUMMY_RECIPIENT, DUMMY_TRANSFER, DUMMY_INVOICE_ITEM)
+    DUMMY_RECIPIENT, DUMMY_TRANSFER, DUMMY_INVOICE_ITEM, generate_order_id)
 
 
 class FunctionalTests(OpenpayTestCase):
@@ -47,13 +47,14 @@ class FunctionalTests(OpenpayTestCase):
             self.patched_api_base.stop()
 
     def test_run(self):
+        DUMMY_CHARGE['order_id'] = generate_order_id()
         charge = openpay.Charge.create(**DUMMY_CHARGE)
-        self.assertFalse(charge.refunded)
-        charge.refund()
-        self.assertTrue(charge.refunded)
+        #self.assertFalse(hasattr(charge, 'refund'))
+        charge.refund(merchant=True)
+        self.assertTrue(hasattr(charge, 'refund'))
 
     def test_refresh(self):
-        #DUMMY_CHARGE['order_id'] = 'oid-test-000{0}'.format(random.randint(200, 300)),
+        DUMMY_CHARGE['order_id'] = generate_order_id()
         charge = openpay.Charge.create(**DUMMY_CHARGE)
         charge2 = openpay.Charge.retrieve_as_merchant(charge.id)
         self.assertEqual(charge2.creation_date, charge.creation_date)
