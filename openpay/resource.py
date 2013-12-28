@@ -353,12 +353,36 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
 
+    def instance_url(self):
+        self.id = utf8(self.id)
+        self.customer = utf8(self.customer_id)
+
+        if self._as_merchant:
+            base = Charge.class_url()
+            extn = urllib.quote_plus(self.id)
+            url = "{0}/charges/{1}".format(base, extn)
+        else:
+            base = Customer.class_url()
+            cust_extn = urllib.quote_plus(self.customer)
+            extn = urllib.quote_plus(self.id)
+            url = "%s/%s/charges/%s" % (base, cust_extn, extn)
+
+        return url
+
     def refund(self, **params):
+        if 'merchant' in params.keys():
+            self._as_merchant = True
+        else:
+            self._as_merchant = False
         url = self.instance_url() + '/refund'
         self.refresh_from(self.request('post', url, params))
         return self
 
     def capture(self, **params):
+        if 'merchant' in params.keys():
+            self._as_merchant = True
+        else:
+            self._as_merchant = False
         url = self.instance_url() + '/capture'
         self.refresh_from(self.request('post', url, params))
         return self
