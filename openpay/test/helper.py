@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import os
 import random
@@ -15,17 +16,33 @@ try:
 except ImportError as err:
     import simplejson as json
 
+def generate_order_id():
+  return 'oid-test-000{0}'.format(random.randint(300, 600))
+
 NOW = datetime.datetime.now()
 
 DUMMY_CARD = {
-    'number': '4242424242424242',
-    'exp_month': NOW.month,
-    'exp_year': NOW.year + 4
+    'card_number': '4111111111111111',
+    'holder_name': 'Juan Lopez',
+    'expiration_month': NOW.month,
+    'expiration_year': str(NOW.year + 4)[2:],
+    "cvv2": "110",
+    "address": {
+      "line1":"Av. 5 de febrero No. 1080 int Roble 207",
+      "line2":"Carrillo puerto",
+      "line3":"Zona industrial carrillo puerto",
+      "postal_code":"06500",
+      "state":"Querétaro",
+      "city":"Querétaro",
+      "country_code":"MX"
+    }
 }
 DUMMY_CHARGE = {
     'amount': 100,
-    'currency': 'usd',
-    'card': DUMMY_CARD
+    'card': DUMMY_CARD,
+    'order_id': generate_order_id(),
+    'method': 'card',
+    'description': 'Dummy Charge',
 }
 
 DUMMY_PLAN = {
@@ -124,9 +141,9 @@ class OpenpayTestCase(unittest.TestCase):
         if api_base:
             openpay.api_base = api_base
         openpay.api_key = os.environ.get(
-            'OPENPAY_API_KEY', 'tGN0bIwXnHdwOa85VABjPdSn8nWY7G7I')
+            'OPENPAY_API_KEY', 'sk_10d37cc4da8e4ffd902cdf62e37abd1b')
         openpay.verify_ssl_certs = False
-        openpay.merchant_id = "xxxxxxxxxxxxxxxxxxxx"
+        openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 
     def tearDown(self):
         super(OpenpayTestCase, self).tearDown()
