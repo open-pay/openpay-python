@@ -134,6 +134,20 @@ class BaseObject(dict):
 
         requestor = api.APIClient(self.api_key)
         response, api_key = requestor.request(method, url, params)
+        if isinstance(response, list):
+            for item in response:
+                if 'object' not in item.keys():
+                    item.update({'object': self.get('item_type')})
+
+            data = {
+                'object': 'list',
+                'count': len(response),
+                'url': url,
+                'data': response,
+                "item_type": self.get('item_type')
+            }
+
+            response = data
 
         return convert_to_openpay_object(response, api_key, self.get('item_type'))
 
@@ -244,7 +258,19 @@ class ListableAPIResource(APIResource):
         url = cls.class_url(params)
         response, api_key = requestor.request('get', url, params)
         klass_name = cls.__name__.lower()
-        return convert_to_openpay_object(response, api_key, klass_name)
+        for item in response:
+            if 'object' not in item.keys():
+                item.update({'object': klass_name})
+
+        data = {
+            'object': 'list',
+            'count': len(response),
+            'url': url,
+            'data': response,
+            'item_type': klass_name,
+        }
+
+        return convert_to_openpay_object(data, api_key)
 
 
 class CreateableAPIResource(APIResource):
@@ -326,7 +352,10 @@ class Card(ListableAPIResource, UpdateableAPIResource, DeletableAPIResource, Cre
 
     def instance_url(self):
         self.id = utf8(self.id)
-        self.customer = utf8(self.customer)
+        if hasattr(self, 'customer'):
+            self.customer = utf8(self.customer)
+        else:
+            self.customer = utf8(self.customer_id)
 
         base = Customer.class_url()
         cust_extn = urllib.quote_plus(self.customer)
@@ -339,6 +368,9 @@ class Card(ListableAPIResource, UpdateableAPIResource, DeletableAPIResource, Cre
         raise NotImplementedError(
             "Can't retrieve a card without a customer ID. Use "
             "customer.cards.retrieve('card_id') instead.")
+
+    def save(self):
+        raise NotImplementedError("This feature is not supported yet by API")
 
 
 class Charge(CreateableAPIResource, ListableAPIResource,
