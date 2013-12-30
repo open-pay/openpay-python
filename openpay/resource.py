@@ -415,10 +415,10 @@ class Charge(CreateableAPIResource, ListableAPIResource,
     def capture(self, **params):
         if 'merchant' in params.keys():
             self._as_merchant = True
+            del params['merchant']
         else:
             self._as_merchant = False
 
-        del params['merchant']
         url = self.instance_url() + '/capture'
         self.refresh_from(self.request('post', url, params))
         return self
@@ -509,7 +509,7 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
     def cancel_subscription(self, **params):
         requestor = api.APIClient(self.api_key)
-        url = self.instance_url() + '/subscriptions'
+        url = self.instance_url() + '/subscriptions' + "/{0}".format(self.subscription.id)
         response, api_key = requestor.request('delete', url, params)
         self.refresh_from({'subscription': response}, api_key, True)
         return self.subscription

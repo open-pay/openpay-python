@@ -17,7 +17,7 @@ except ImportError as err:
     import simplejson as json
 
 def generate_order_id():
-  return 'oid-test-000{0}'.format(random.randint(600, 1200))
+  return 'oid-test-000{0}'.format(random.randint(2000, 3000))
 
 NOW = datetime.datetime.now()
 
@@ -47,9 +47,12 @@ DUMMY_CHARGE = {
 
 DUMMY_PLAN = {
     'amount': 2000,
-    'interval': 'month',
+    'status_after_retry': 'cancelled',
     'name': 'Amazing Gold Plan',
-    'currency': 'usd',
+    'retry_times': 2,
+    'repeat_unit': 'month',
+    'trial_days': 30,
+    'repeat_every': 1,
     'id': ('openpay-test-gold-' +
            ''.join(random.choice(string.ascii_lowercase) for x in range(10)))
 }

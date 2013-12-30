@@ -185,10 +185,10 @@ class ChargeTest(OpenpayTestCase):
 
         charge = openpay.Charge.create(**params)
 
-        self.assertFalse(charge.captured)
+        self.assertFalse(hasattr(charge, 'captured'))
 
         self.assertTrue(charge is charge.capture())
-        self.assertTrue(openpay.Charge.retrieve(charge.id).captured)
+        self.assertTrue(openpay.Charge.retrieve_as_merchant(charge.id).captured)
 
 
 class CustomerTest(OpenpayTestCase):
@@ -239,62 +239,68 @@ class TransferTest(OpenpayTestCase):
         self.assertTrue(isinstance(transfers.data[0], openpay.Transfer))
 
 
-# class CustomerPlanTest(OpenpayTestCase):
+class CustomerPlanTest(OpenpayTestCase):
 
-#     def setUp(self):
-#         super(CustomerPlanTest, self).setUp()
-#         try:
-#             self.plan_obj = stripe.Plan.create(**DUMMY_PLAN)
-#         except stripe.error.InvalidRequestError:
-#             self.plan_obj = None
+    def setUp(self):
+        super(CustomerPlanTest, self).setUp()
+        try:
+            self.plan_obj = openpay.Plan.create(**DUMMY_PLAN)
+        except openpay.error.InvalidRequestError:
+            self.plan_obj = None
 
-#     def tearDown(self):
-#         if self.plan_obj:
-#             try:
-#                 self.plan_obj.delete()
-#             except stripe.error.InvalidRequestError:
-#                 pass
-#         super(CustomerPlanTest, self).tearDown()
+    def tearDown(self):
+        if self.plan_obj:
+            try:
+                self.plan_obj.delete()
+            except openpay.error.InvalidRequestError:
+                pass
+        super(CustomerPlanTest, self).tearDown()
 
-#     def test_create_customer(self):
-#         self.assertRaises(stripe.error.InvalidRequestError,
-#                           stripe.Customer.create,
-#                           plan=DUMMY_PLAN['id'])
-#         customer = stripe.Customer.create(
-#             plan=DUMMY_PLAN['id'], card=DUMMY_CARD)
-#         self.assertTrue(hasattr(customer, 'subscription'))
-#         self.assertFalse(hasattr(customer, 'plan'))
-#         customer.delete()
-#         self.assertFalse(hasattr(customer, 'subscription'))
-#         self.assertFalse(hasattr(customer, 'plan'))
-#         self.assertTrue(customer.deleted)
+    def test_create_customer(self):
+        self.assertRaises(openpay.error.InvalidRequestError,
+                          openpay.Customer.create,
+                          plan=DUMMY_PLAN['id'])
+        customer = openpay.Customer.create(name="Miguel", last_name="Lopez", email="mlopez@example.com")
+        customer.update_subscription(plan_id=self.plan_obj.id, trial_days="5", card=DUMMY_CARD)
+        self.assertTrue(hasattr(customer, 'subscription'))
+        self.assertFalse(hasattr(customer, 'plan'))
+        customer.cancel_subscription()
+        customer.delete()
+        self.assertFalse(hasattr(customer, 'subscription'))
+        self.assertFalse(hasattr(customer, 'plan'))
+        # self.assertTrue(customer.deleted)
 
-#     def test_update_and_cancel_subscription(self):
-#         customer = stripe.Customer.create(card=DUMMY_CARD)
+    def test_update_and_cancel_subscription(self):
+        customer = openpay.Customer.create(name="Miguel", last_name="Lopez", email="mlopez@example.com")
 
-#         sub = customer.update_subscription(plan=DUMMY_PLAN['id'])
-#         self.assertEqual(customer.subscription.id, sub.id)
-#         self.assertEqual(DUMMY_PLAN['id'], sub.plan.id)
+        sub = customer.update_subscription(plan_id=self.plan_obj.id, card=DUMMY_CARD)
+        self.assertEqual(customer.subscription.id, sub.id)
+        # self.assertEqual(DUMMY_PLAN['id'], sub.plan.id)
 
-#         customer.cancel_subscription(at_period_end=True)
-#         self.assertEqual(customer.subscription.status, 'active')
-#         self.assertTrue(customer.subscription.cancel_at_period_end)
-#         customer.cancel_subscription()
-#         self.assertEqual(customer.subscription.status, 'canceled')
+        customer.cancel_subscription(at_period_end=True)
+        self.assertEqual(customer.subscription.status, 'active')
+        self.assertTrue(customer.subscription.cancel_at_period_end)
+        customer.cancel_subscription()
+        self.assertEqual(customer.subscription.status, 'canceled')
 
-#     def test_datetime_trial_end(self):
-#         customer = stripe.Customer.create(
-#             plan=DUMMY_PLAN['id'], card=DUMMY_CARD,
-#             trial_end=datetime.datetime.now() + datetime.timedelta(days=15))
-#         self.assertTrue(customer.id)
+    def test_datetime_trial_end(self):
+        trial_end = datetime.datetime.now() + datetime.timedelta(days=15)
+        customer = openpay.Customer.create(
+            name="Miguel", last_name="Lopez", email="mlopez@example.com",
+            plan=DUMMY_PLAN['id'], card=DUMMY_CARD,
+            trial_end=trial_end.strftime('Y-m-d'))
+        self.assertTrue(customer.id)
 
-#     def test_integer_trial_end(self):
-#         trial_end_dttm = datetime.datetime.now() + datetime.timedelta(days=15)
-#         trial_end_int = int(time.mktime(trial_end_dttm.timetuple()))
-#         customer = stripe.Customer.create(plan=DUMMY_PLAN['id'],
-#                                           card=DUMMY_CARD,
-#                                           trial_end=trial_end_int)
-#         self.assertTrue(customer.id)
+    def test_integer_trial_end(self):
+        trial_end_dttm = datetime.datetime.now() + datetime.timedelta(days=15)
+        trial_end_int = int(time.mktime(trial_end_dttm.timetuple()))
+        customer = openpay.Customer.create(name="Miguel",
+                                           last_name="Lopez",
+                                           email="mlopez@example.com",
+                                           plan=DUMMY_PLAN['id'],
+                                           card=DUMMY_CARD,
+                                           trial_end=trial_end_int)
+        self.assertTrue(customer.id)
 
 
 class InvalidRequestErrorTest(OpenpayTestCase):
