@@ -49,7 +49,7 @@ class FunctionalTests(OpenpayTestCase):
     def test_run(self):
         DUMMY_CHARGE['order_id'] = generate_order_id()
         charge = openpay.Charge.create(**DUMMY_CHARGE)
-        #self.assertFalse(hasattr(charge, 'refund'))
+        # self.assertFalse(hasattr(charge, 'refund'))
         charge.refund(merchant=True)
         self.assertTrue(hasattr(charge, 'refund'))
 
@@ -118,202 +118,128 @@ if sys.version_info >= (2, 7):
 #     request_client = openpay.http_client.PycurlClient
 
 
-# class AuthenticationErrorTest(OpenPayTestCase):
+class AuthenticationErrorTest(OpenpayTestCase):
 
-#     def test_invalid_credentials(self):
-#         key = openpay.api_key
-#         try:
-#             openpay.api_key = 'invalid'
-#             openpay.Customer.create()
-#         except openpay.error.AuthenticationError, e:
-#             self.assertEqual(401, e.http_status)
-#             self.assertTrue(isinstance(e.http_body, basestring))
-#             self.assertTrue(isinstance(e.json_body, dict))
-#         finally:
-#             openpay.api_key = key
+    def test_invalid_credentials(self):
+        key = openpay.api_key
+        try:
+            openpay.api_key = 'invalid'
+            openpay.Customer.create()
+        except openpay.error.AuthenticationError, e:
+            self.assertEqual(401, e.http_status)
+            self.assertTrue(isinstance(e.http_body, basestring))
+            self.assertTrue(isinstance(e.json_body, dict))
+        finally:
+            openpay.api_key = key
 
 
-# class CardErrorTest(OpenPayTestCase):
+class CardErrorTest(OpenpayTestCase):
 
-#     def test_declined_card_props(self):
-#         EXPIRED_CARD = DUMMY_CARD.copy()
-#         EXPIRED_CARD['exp_month'] = NOW.month - 2
-#         EXPIRED_CARD['exp_year'] = NOW.year - 2
-#         try:
-#             openpay.Charge.create(amount=100, currency='usd', card=EXPIRED_CARD)
-#         except openpay.error.CardError, e:
-#             self.assertEqual(402, e.http_status)
-#             self.assertTrue(isinstance(e.http_body, basestring))
-#             self.assertTrue(isinstance(e.json_body, dict))
+    def test_declined_card_props(self):
+        EXPIRED_CARD = DUMMY_CARD.copy()
+        expiration_year = NOW.year - 2
+        EXPIRED_CARD['expiration_month'] = NOW.month - 2
+        EXPIRED_CARD['expiration_year'] = str(expiration_year)[2:]
+        try:
+            openpay.Charge.create(amount=100, method='card', description="Test Order", order_id="oid-00080", card=EXPIRED_CARD)
+        except openpay.error.CardError, e:
+            self.assertEqual(402, e.http_status)
+            self.assertTrue(isinstance(e.http_body, basestring))
+            self.assertTrue(isinstance(e.json_body, dict))
 
 # Note that these are in addition to the core functional charge tests
 
 
-# class ChargeTest(StripeTestCase):
+class ChargeTest(OpenpayTestCase):
 
-#     def setUp(self):
-#         super(ChargeTest, self).setUp()
+    def setUp(self):
+        super(ChargeTest, self).setUp()
 
-#     def test_charge_list_all(self):
-#         charge_list = stripe.Charge.all(created={'lt': NOW})
-#         list_result = charge_list.all(created={'lt': NOW})
+    def test_charge_list_all(self):
+        charge_list = openpay.Charge.all(creation={'lte': NOW.strftime('Y-m-d')})
+        list_result = charge_list.all(creation={'lte': NOW.strftime('Y-m-d')})
 
-#         self.assertEqual(len(charge_list.data),
-#                          len(list_result.data))
+        self.assertEqual(len(charge_list.data),
+                         len(list_result.data))
 
-#         for expected, actual in zip(charge_list.data,
-#                                     list_result.data):
-#             self.assertEqual(expected.id, actual.id)
+        for expected, actual in zip(charge_list.data,
+                                    list_result.data):
+            self.assertEqual(expected.id, actual.id)
 
-#     def test_charge_list_create(self):
-#         charge_list = stripe.Charge.all()
+    def test_charge_list_create(self):
+        charge_list = openpay.Charge.all()
+        DUMMY_CHARGE['order_id'] = generate_order_id()
+        charge = charge_list.create(**DUMMY_CHARGE)
 
-#         charge = charge_list.create(**DUMMY_CHARGE)
+        self.assertTrue(isinstance(charge, openpay.Charge))
+        self.assertEqual(DUMMY_CHARGE['amount'], charge.amount)
 
-#         self.assertTrue(isinstance(charge, stripe.Charge))
-#         self.assertEqual(DUMMY_CHARGE['amount'], charge.amount)
+    def test_charge_list_retrieve(self):
+        charge_list = openpay.Charge.all()
+        charge = charge_list.retrieve(charge_list.data[0].id)
+        self.assertTrue(isinstance(charge, openpay.Charge))
 
-#     def test_charge_list_retrieve(self):
-#         charge_list = stripe.Charge.all()
+    def test_charge_capture(self):
+        params = DUMMY_CHARGE.copy()
+        params['capture'] = False
 
-#         charge = charge_list.retrieve(charge_list.data[0].id)
+        charge = openpay.Charge.create(**params)
 
-#         self.assertTrue(isinstance(charge, stripe.Charge))
+        self.assertFalse(charge.captured)
 
-#     def test_charge_capture(self):
-#         params = DUMMY_CHARGE.copy()
-#         params['capture'] = False
-
-#         charge = stripe.Charge.create(**params)
-
-#         self.assertFalse(charge.captured)
-
-#         self.assertTrue(charge is charge.capture())
-#         self.assertTrue(stripe.Charge.retrieve(charge.id).captured)
-
-#     def test_charge_dispute(self):
-#         # We don't have a good way of simulating disputes
-#         # This is a pretty lame test but it at least checks that the
-#         # dispute code fails in the way we predict, not from e.g.
-#         # a syntax error
-
-#         charge = stripe.Charge.create(**DUMMY_CHARGE)
-
-#         self.assertRaisesRegexp(stripe.error.InvalidRequestError,
-#                                 'No dispute for charge',
-#                                 charge.update_dispute)
-
-#         self.assertRaisesRegexp(stripe.error.InvalidRequestError,
-#                                 'No dispute for charge',
-#                                 charge.close_dispute)
+        self.assertTrue(charge is charge.capture())
+        self.assertTrue(openpay.Charge.retrieve(charge.id).captured)
 
 
-# class AccountTest(StripeTestCase):
+class CustomerTest(OpenpayTestCase):
 
-#     def test_retrieve_account(self):
-#         account = stripe.Account.retrieve()
-#         self.assertEqual('test+bindings@stripe.com', account.email)
-#         self.assertFalse(account.charge_enabled)
-#         self.assertFalse(account.details_submitted)
+    def test_list_customers(self):
+        customers = openpay.Customer.all()
+        self.assertTrue(isinstance(customers.data, list))
 
+    def test_list_charges(self):
+        customer = openpay.Customer.create(name="Miguel Lopez", email="mlopez@example.com", description="foo bar",
+                                           card=DUMMY_CARD)
 
-# class BalanceTest(StripeTestCase):
+        customer.charges.create(
+            amount=100, method="card", description="Customer test charge", order_id=generate_order_id(), card=DUMMY_CARD)
 
-#     def test_retrieve_balance(self):
-#         balance = stripe.Balance.retrieve()
-#         self.assertTrue(hasattr(balance, 'available'))
-#         self.assertTrue(isinstance(balance['available'], list))
-#         if len(balance['available']):
-#             self.assertTrue(hasattr(balance['available'][0], 'amount'))
-#             self.assertTrue(hasattr(balance['available'][0], 'currency'))
+        self.assertEqual(1,
+                         len(customer.charges.all().data))
 
-#         self.assertTrue(hasattr(balance, 'pending'))
-#         self.assertTrue(isinstance(balance['pending'], list))
-#         if len(balance['pending']):
-#             self.assertTrue(hasattr(balance['pending'][0], 'amount'))
-#             self.assertTrue(hasattr(balance['pending'][0], 'currency'))
+    def test_unset_description(self):
+        customer = openpay.Customer.create(name="Miguel", last_name="Lopez", email="mlopez@example.com", description="foo bar")
 
-#         self.assertEqual(False, balance['livemode'])
-#         self.assertEqual('balance', balance['object'])
+        customer.description = None
+        customer.save()
 
+        self.assertEqual(None, customer.retrieve(customer.id).get('description'))
 
-# class BalanceTransactionTest(StripeTestCase):
+    def test_cannot_set_empty_string(self):
+        customer = openpay.Customer()
+        self.assertRaises(ValueError, setattr, customer, "description", "")
 
-#     def test_list_balance_transactions(self):
-#         balance_transactions = stripe.BalanceTransaction.all()
-#         self.assertTrue(hasattr(balance_transactions, 'count'))
-#         self.assertTrue(isinstance(balance_transactions.data, list))
+    # def test_update_customer_card(self):
+    #     customer = openpay.Customer.all(limit=1).data[0]
+    #     card = customer.cards.create(**DUMMY_CARD)
+    #     print card
+    #     card.name = 'Python bindings test'
+    #     card.save()
 
-
-# class ApplicationFeeTest(StripeTestCase):
-#     def test_list_application_fees(self):
-#         application_fees = stripe.ApplicationFee.all()
-#         self.assertTrue(hasattr(application_fees, 'count'))
-#         self.assertTrue(isinstance(application_fees.data, list))
+    #     self.assertEqual('Python bindings test',
+    #                      customer.cards.retrieve(card.id).name)
 
 
-# class CustomerTest(StripeTestCase):
+class TransferTest(OpenpayTestCase):
 
-#     def test_list_customers(self):
-#         customers = stripe.Customer.all()
-#         self.assertTrue(isinstance(customers.data, list))
-
-#     def test_list_charges(self):
-#         customer = stripe.Customer.create(description="foo bar",
-#                                           card=DUMMY_CARD)
-
-#         stripe.Charge.create(customer=customer.id, amount=100, currency='usd')
-
-#         self.assertEqual(1,
-#                          len(customer.charges().data))
-
-#     def test_unset_description(self):
-#         customer = stripe.Customer.create(description="foo bar")
-
-#         customer.description = None
-#         customer.save()
-
-#         self.assertEqual(None, customer.retrieve(customer.id).description)
-
-#     def test_cannot_set_empty_string(self):
-#         customer = stripe.Customer()
-#         self.assertRaises(ValueError, setattr, customer, "description", "")
-
-#     def test_update_customer_card(self):
-#         customer = stripe.Customer.all(count=1).data[0]
-#         card = customer.cards.create(card=DUMMY_CARD)
-
-#         card.name = 'Python bindings test'
-#         card.save()
-
-#         self.assertEqual('Python bindings test',
-#                          customer.cards.retrieve(card.id).name)
+    def test_list_transfers(self):
+        customer = openpay.Customer.retrieve("amce5ycvwycfzyarjf8l")
+        transfers = customer.transfers.all()
+        self.assertTrue(isinstance(transfers.data, list))
+        self.assertTrue(isinstance(transfers.data[0], openpay.Transfer))
 
 
-# class TransferTest(StripeTestCase):
-
-#     def test_list_transfers(self):
-#         transfers = stripe.Transfer.all()
-#         self.assertTrue(isinstance(transfers.data, list))
-#         self.assertTrue(isinstance(transfers.data[0], stripe.Transfer))
-
-
-# class RecipientTest(StripeTestCase):
-
-#     def test_list_recipients(self):
-#         recipients = stripe.Recipient.all()
-#         self.assertTrue(isinstance(recipients.data, list))
-#         self.assertTrue(isinstance(recipients.data[0], stripe.Recipient))
-
-#     def test_recipient_transfers(self):
-#         recipient = stripe.Recipient.all(count=1).data[0]
-
-#         # Weak assertion since the list could be empty
-#         for transfer in recipient.transfers().data:
-#             self.assertTrue(isinstance(transfer, stripe.Transfer))
-
-
-# class CustomerPlanTest(StripeTestCase):
+# class CustomerPlanTest(OpenpayTestCase):
 
 #     def setUp(self):
 #         super(CustomerPlanTest, self).setUp()
@@ -371,92 +297,26 @@ if sys.version_info >= (2, 7):
 #         self.assertTrue(customer.id)
 
 
-# class InvoiceTest(StripeTestCase):
+class InvalidRequestErrorTest(OpenpayTestCase):
 
-#     def test_invoice(self):
-#         customer = stripe.Customer.create(card=DUMMY_CARD)
+    def test_nonexistent_object(self):
+        try:
+            openpay.Charge.retrieve('invalid')
+        except openpay.error.InvalidRequestError, e:
+            self.assertEqual(404, e.http_status)
+            self.assertTrue(isinstance(e.http_body, basestring))
+            self.assertTrue(isinstance(e.json_body, dict))
 
-#         customer.add_invoice_item(**DUMMY_INVOICE_ITEM)
-
-#         items = customer.invoice_items()
-#         self.assertEqual(1, len(items.data))
-
-#         invoice = stripe.Invoice.create(customer=customer)
-
-#         invoices = customer.invoices()
-#         self.assertEqual(1, len(invoices.data))
-#         self.assertEqual(1, len(invoices.data[0].lines.data))
-#         self.assertEqual(invoice.id, invoices.data[0].id)
-
-#         self.assertTrue(invoice.pay().paid)
-
-#         # It would be better to test for an actually existing
-#         # upcoming invoice but that isn't working so we'll just
-#         # check that the appropriate error comes back for now
-#         self.assertRaisesRegexp(
-#             stripe.error.InvalidRequestError,
-#             'No upcoming invoices',
-#             stripe.Invoice.upcoming,
-#             customer=customer)
+    def test_invalid_data(self):
+        try:
+            openpay.Charge.create()
+        except openpay.error.InvalidRequestError, e:
+            self.assertEqual(400, e.http_status)
+            self.assertTrue(isinstance(e.http_body, basestring))
+            self.assertTrue(isinstance(e.json_body, dict))
 
 
-# class CouponTest(StripeTestCase):
-
-#     def test_create_coupon(self):
-#         self.assertRaises(stripe.error.InvalidRequestError,
-#                           stripe.Coupon.create, percent_off=25)
-#         c = stripe.Coupon.create(**DUMMY_COUPON)
-#         self.assertTrue(isinstance(c, stripe.Coupon))
-#         self.assertTrue(hasattr(c, 'percent_off'))
-#         self.assertTrue(hasattr(c, 'id'))
-
-#     def test_delete_coupon(self):
-#         c = stripe.Coupon.create(**DUMMY_COUPON)
-#         self.assertFalse(hasattr(c, 'deleted'))
-#         c.delete()
-#         self.assertFalse(hasattr(c, 'percent_off'))
-#         self.assertTrue(hasattr(c, 'id'))
-#         self.assertTrue(c.deleted)
-
-
-# class CustomerCouponTest(StripeTestCase):
-
-#     def setUp(self):
-#         super(CustomerCouponTest, self).setUp()
-#         self.coupon_obj = stripe.Coupon.create(**DUMMY_COUPON)
-
-#     def tearDown(self):
-#         self.coupon_obj.delete()
-
-#     def test_attach_coupon(self):
-#         customer = stripe.Customer.create(coupon=self.coupon_obj.id)
-#         self.assertTrue(hasattr(customer, 'discount'))
-#         self.assertNotEqual(None, customer.discount)
-
-#         customer.delete_discount()
-#         self.assertEqual(None, customer.discount)
-
-
-# class InvalidRequestErrorTest(StripeTestCase):
-
-#     def test_nonexistent_object(self):
-#         try:
-#             stripe.Charge.retrieve('invalid')
-#         except stripe.error.InvalidRequestError, e:
-#             self.assertEqual(404, e.http_status)
-#             self.assertTrue(isinstance(e.http_body, basestring))
-#             self.assertTrue(isinstance(e.json_body, dict))
-
-#     def test_invalid_data(self):
-#         try:
-#             stripe.Charge.create()
-#         except stripe.error.InvalidRequestError, e:
-#             self.assertEqual(400, e.http_status)
-#             self.assertTrue(isinstance(e.http_body, basestring))
-#             self.assertTrue(isinstance(e.json_body, dict))
-
-
-# class PlanTest(StripeTestCase):
+# class PlanTest(OpenpayTestCase):
 
 #     def setUp(self):
 #         super(PlanTest, self).setUp()
@@ -491,17 +351,17 @@ if sys.version_info >= (2, 7):
 #         plan = stripe.Plan(p.id)
 #         plan.name = name
 
-#         # should only have name and id
+# should only have name and id
 #         self.assertEqual(sorted(['id', 'name']), sorted(plan.keys()))
 #         plan.save()
 
 #         self.assertEqual(name, plan.name)
-#         # should load all the properties
+# should load all the properties
 #         self.assertEqual(p.amount, plan.amount)
 #         p.delete()
 
 
-# class MetadataTest(StripeTestCase):
+# class MetadataTest(OpenpayTestCase):
 
 #     def setUp(self):
 #         super(MetadataTest, self).setUp()

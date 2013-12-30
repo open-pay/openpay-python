@@ -122,8 +122,8 @@ class ListObjectTests(OpenpayApiTestCase):
         }])
 
     def assertResponse(self, res):
-        self.assertTrue(isinstance(res[0], openpay.Charge))
-        self.assertEqual('bar', res[0].foo)
+        self.assertTrue(isinstance(res.data[0], openpay.Charge))
+        self.assertEqual('bar', res.data[0].foo)
 
     def test_all(self):
         res = self.lo.all(myparam='you')
@@ -250,10 +250,10 @@ class ListableAPIResourceTests(OpenpayApiTestCase):
         self.requestor_mock.request.assert_called_with(
             'get', url, {})
 
-        self.assertEqual(2, len(res))
-        self.assertTrue(all(isinstance(obj, openpay.Charge) for obj in res))
-        self.assertEqual('jose', res[0].name)
-        self.assertEqual('curly', res[1].name)
+        self.assertEqual(2, len(res.data))
+        self.assertTrue(all(isinstance(obj, openpay.Charge) for obj in res.data))
+        self.assertEqual('jose', res.data[0].name)
+        self.assertEqual('curly', res.data[1].name)
 
 
 class CreateableAPIResourceTests(OpenpayApiTestCase):

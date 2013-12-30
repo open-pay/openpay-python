@@ -17,7 +17,7 @@ except ImportError as err:
     import simplejson as json
 
 def generate_order_id():
-  return 'oid-test-000{0}'.format(random.randint(300, 600))
+  return 'oid-test-000{0}'.format(random.randint(600, 1200))
 
 NOW = datetime.datetime.now()
 
