@@ -322,49 +322,49 @@ class InvalidRequestErrorTest(OpenpayTestCase):
             self.assertTrue(isinstance(e.json_body, dict))
 
 
-# class PlanTest(OpenpayTestCase):
+class PlanTest(OpenpayTestCase):
 
-#     def setUp(self):
-#         super(PlanTest, self).setUp()
-#         try:
-#             stripe.Plan(DUMMY_PLAN['id']).delete()
-#         except stripe.error.InvalidRequestError:
-#             pass
+    def setUp(self):
+        super(PlanTest, self).setUp()
+        try:
+            openpay.Plan(DUMMY_PLAN['id']).delete()
+        except openpay.error.InvalidRequestError:
+            pass
 
-#     def test_create_plan(self):
-#         self.assertRaises(stripe.error.InvalidRequestError,
-#                           stripe.Plan.create, amount=2500)
-#         p = stripe.Plan.create(**DUMMY_PLAN)
-#         self.assertTrue(hasattr(p, 'amount'))
-#         self.assertTrue(hasattr(p, 'id'))
-#         self.assertEqual(DUMMY_PLAN['amount'], p.amount)
-#         p.delete()
-#         self.assertTrue(hasattr(p, 'deleted'))
-#         self.assertTrue(p.deleted)
+    def test_create_plan(self):
+        self.assertRaises(openpay.error.InvalidRequestError,
+                          openpay.Plan.create, amount=2500)
+        p = openpay.Plan.create(**DUMMY_PLAN)
+        self.assertTrue(hasattr(p, 'amount'))
+        self.assertTrue(hasattr(p, 'id'))
+        self.assertEqual(DUMMY_PLAN['amount'], p.amount)
+        p.delete()
+        self.assertEqual(p.keys(), [])
+        # self.assertTrue(p.deleted)
 
-#     def test_update_plan(self):
-#         p = stripe.Plan.create(**DUMMY_PLAN)
-#         name = "New plan name"
-#         p.name = name
-#         p.save()
-#         self.assertEqual(name, p.name)
-#         p.delete()
+    def test_update_plan(self):
+        p = openpay.Plan.create(**DUMMY_PLAN)
+        name = "New plan name"
+        p.name = name
+        p.save()
+        self.assertEqual(name, p.name)
+        p.delete()
 
-#     def test_update_plan_without_retrieving(self):
-#         p = stripe.Plan.create(**DUMMY_PLAN)
+    def test_update_plan_without_retrieving(self):
+        p = openpay.Plan.create(**DUMMY_PLAN)
 
-#         name = 'updated plan name!'
-#         plan = stripe.Plan(p.id)
-#         plan.name = name
+        name = 'updated plan name!'
+        plan = openpay.Plan(p.id)
+        plan.name = name
 
-# should only have name and id
-#         self.assertEqual(sorted(['id', 'name']), sorted(plan.keys()))
-#         plan.save()
+        # should only have name and id
+        self.assertEqual(sorted(['id', 'name']), sorted(plan.keys()))
+        plan.save()
 
-#         self.assertEqual(name, plan.name)
-# should load all the properties
-#         self.assertEqual(p.amount, plan.amount)
-#         p.delete()
+        self.assertEqual(name, plan.name)
+        # should load all the properties
+        self.assertEqual(p.amount, plan.amount)
+        p.delete()
 
 
 # class MetadataTest(OpenpayTestCase):
