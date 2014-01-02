@@ -51,7 +51,7 @@ DUMMY_PLAN = {
     'name': 'Amazing Gold Plan',
     'retry_times': 2,
     'repeat_unit': 'month',
-    'trial_days': 30,
+    'trial_days': 0,
     'repeat_every': 1,
     'id': ('openpay-test-gold-' +
            ''.join(random.choice(string.ascii_lowercase) for x in range(10)))

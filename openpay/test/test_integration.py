@@ -72,7 +72,7 @@ class FunctionalTests(OpenpayTestCase):
     def test_raise(self):
         EXPIRED_CARD = DUMMY_CARD.copy()
         expiration_year = NOW.year - 2
-        EXPIRED_CARD['expiration_month'] = NOW.month - 2
+        EXPIRED_CARD['expiration_month'] = NOW.month
         EXPIRED_CARD['expiration_year'] = str(expiration_year)[2:]
         self.assertRaises(openpay.error.CardError, openpay.Charge.create,
                           amount=100, method='card', description="Test Order", order_id="oid-00080", card=EXPIRED_CARD)
@@ -138,7 +138,7 @@ class CardErrorTest(OpenpayTestCase):
     def test_declined_card_props(self):
         EXPIRED_CARD = DUMMY_CARD.copy()
         expiration_year = NOW.year - 2
-        EXPIRED_CARD['expiration_month'] = NOW.month - 2
+        EXPIRED_CARD['expiration_month'] = NOW.month
         EXPIRED_CARD['expiration_year'] = str(expiration_year)[2:]
         try:
             openpay.Charge.create(amount=100, method='card', description="Test Order", order_id="oid-00080", card=EXPIRED_CARD)
@@ -261,27 +261,23 @@ class CustomerPlanTest(OpenpayTestCase):
                           openpay.Customer.create,
                           plan=DUMMY_PLAN['id'])
         customer = openpay.Customer.create(name="Miguel", last_name="Lopez", email="mlopez@example.com")
-        customer.update_subscription(plan_id=self.plan_obj.id, trial_days="5", card=DUMMY_CARD)
-        self.assertTrue(hasattr(customer, 'subscription'))
-        self.assertFalse(hasattr(customer, 'plan'))
-        customer.cancel_subscription()
+        subscription = customer.subscriptions.create(plan_id=self.plan_obj.id, trial_days="0", card=DUMMY_CARD)
+        self.assertTrue(isinstance(subscription, openpay.Subscription))
+        subscription.delete()
         customer.delete()
         self.assertFalse(hasattr(customer, 'subscription'))
         self.assertFalse(hasattr(customer, 'plan'))
-        # self.assertTrue(customer.deleted)
 
     def test_update_and_cancel_subscription(self):
         customer = openpay.Customer.create(name="Miguel", last_name="Lopez", email="mlopez@example.com")
 
-        sub = customer.update_subscription(plan_id=self.plan_obj.id, card=DUMMY_CARD)
-        self.assertEqual(customer.subscription.id, sub.id)
-        # self.assertEqual(DUMMY_PLAN['id'], sub.plan.id)
+        sub = customer.subscriptions.create(plan_id=self.plan_obj.id, card=DUMMY_CARD)
 
-        customer.cancel_subscription(at_period_end=True)
-        self.assertEqual(customer.subscription.status, 'active')
-        self.assertTrue(customer.subscription.cancel_at_period_end)
-        customer.cancel_subscription()
-        self.assertEqual(customer.subscription.status, 'canceled')
+        sub.cancel_at_period_end = True
+        sub.save()
+        self.assertEqual(sub.status, 'active')
+        self.assertTrue(sub.cancel_at_period_end)
+        sub.delete()
 
     def test_datetime_trial_end(self):
         trial_end = datetime.datetime.now() + datetime.timedelta(days=15)
@@ -365,82 +361,6 @@ class PlanTest(OpenpayTestCase):
         # should load all the properties
         self.assertEqual(p.amount, plan.amount)
         p.delete()
-
-
-# class MetadataTest(OpenpayTestCase):
-
-#     def setUp(self):
-#         super(MetadataTest, self).setUp()
-#         self.initial_metadata = {
-#             'address': '77 Massachusetts Ave, Cambridge',
-#             'uuid': 'id'
-#         }
-
-#         charge = stripe.Charge.create(
-#             metadata=self.initial_metadata, **DUMMY_CHARGE)
-#         customer = stripe.Customer.create(
-#             metadata=self.initial_metadata, card=DUMMY_CARD)
-#         recipient = stripe.Recipient.create(
-#             metadata=self.initial_metadata, **DUMMY_RECIPIENT)
-#         transfer = stripe.Transfer.create(
-#             metadata=self.initial_metadata, **DUMMY_TRANSFER)
-
-#         self.support_metadata = [charge, customer, recipient, transfer]
-
-#     def test_noop_metadata(self):
-#         for obj in self.support_metadata:
-#             obj.description = 'test'
-#             obj.save()
-#             metadata = obj.retrieve(obj.id).metadata
-#             self.assertEqual(self.initial_metadata, metadata)
-
-#     def test_unset_metadata(self):
-#         for obj in self.support_metadata:
-#             obj.metadata = None
-#             expected_metadata = {}
-#             obj.save()
-#             metadata = obj.retrieve(obj.id).metadata
-#             self.assertEqual(expected_metadata, metadata)
-
-#     def test_whole_update(self):
-#         for obj in self.support_metadata:
-#             expected_metadata = {'txn_id': '3287423s34'}
-#             obj.metadata = expected_metadata.copy()
-#             obj.save()
-#             metadata = obj.retrieve(obj.id).metadata
-#             self.assertEqual(expected_metadata, metadata)
-
-#     def test_individual_delete(self):
-#         for obj in self.support_metadata:
-#             obj.metadata['uuid'] = None
-#             expected_metadata = {'address': self.initial_metadata['address']}
-#             obj.save()
-#             metadata = obj.retrieve(obj.id).metadata
-#             self.assertEqual(expected_metadata, metadata)
-
-#     def test_individual_update(self):
-#         for obj in self.support_metadata:
-#             obj.metadata['txn_id'] = 'abc'
-#             expected_metadata = {'txn_id': 'abc'}
-#             expected_metadata.update(self.initial_metadata)
-#             obj.save()
-#             metadata = obj.retrieve(obj.id).metadata
-#             self.assertEqual(expected_metadata, metadata)
-
-#     def test_combo_update(self):
-#         for obj in self.support_metadata:
-#             obj.metadata['txn_id'] = 'bar'
-#             obj.metadata = {'uid': '6735'}
-#             obj.save()
-#             metadata = obj.retrieve(obj.id).metadata
-#             self.assertEqual({'uid': '6735'}, metadata)
-
-#         for obj in self.support_metadata:
-#             obj.metadata = {'uid': '6735'}
-#             obj.metadata['foo'] = 'bar'
-#             obj.save()
-#             metadata = obj.retrieve(obj.id).metadata
-#             self.assertEqual({'uid': '6735', 'foo': 'bar'}, metadata)
 
 
 if __name__ == '__main__':

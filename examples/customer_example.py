@@ -13,12 +13,12 @@ openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 print "\n Retrieving customer"
 customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
 print customer
-print "\n Retrieving customer cards"
-cards = customer.cards.all()
-for card in cards.data:
-	print type(card)
-print "Retrieving card with ID: kvxvccpsesm4pwmtgnjb"
-print customer.cards.retrieve('kvxvccpsesm4pwmtgnjb')
+# print "\n Retrieving customer cards"
+# cards = customer.cards.all()
+# for card in cards.data:
+# 	print type(card)
+# print "Retrieving card with ID: kvxvccpsesm4pwmtgnjb"
+# print customer.cards.retrieve('kvxvccpsesm4pwmtgnjb')
 # print "\nCreating new customer"
 # customer = openpay.Customer.create(
 #     name="Juan",
@@ -35,4 +35,8 @@ print customer.cards.retrieve('kvxvccpsesm4pwmtgnjb')
 #     last_name="Perez",
 #     phone_number="44209087654"
 # )
-print openpay.Customer.all()
+# print openpay.Customer.all()
+print "Displaying all user subscriptions"
+print customer.subscriptions.all()
+print "Retrieving specific subscription"
+print customer.subscriptions.retrieve("sl7zlwys6hxicr8dbhmo")

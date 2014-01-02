@@ -18,7 +18,7 @@ from openpay.util import utf8, logger
 def convert_to_openpay_object(resp, api_key, item_type=None):
     types = {'charge': Charge, 'customer': Customer,
              'plan': Plan, 'transfer': Transfer, 'list': ListObject,
-             'card': Card, 'payout': Payout,
+             'card': Card, 'payout': Payout, 'subscription': Subscription,
              'bank_account': BankAccount, 'fee': Fee}
 
     if isinstance(resp, list):
@@ -500,26 +500,6 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 class Customer(CreateableAPIResource, UpdateableAPIResource,
                ListableAPIResource, DeletableAPIResource):
 
-    def update_subscription(self, **params):
-        requestor = api.APIClient(self.api_key)
-        url = self.instance_url() + '/subscriptions'
-        response, api_key = requestor.request('post', url, params)
-        self.refresh_from({'subscription': response}, api_key, True)
-        return self.subscription
-
-    def cancel_subscription(self, **params):
-        requestor = api.APIClient(self.api_key)
-        url = self.instance_url() + '/subscriptions' + "/{0}".format(self.subscription.id)
-        response, api_key = requestor.request('delete', url, params)
-        self.refresh_from({'subscription': response}, api_key, True)
-        return self.subscription
-
-    def delete_discount(self, **params):
-        requestor = api.APIClient(self.api_key)
-        url = self.instance_url() + '/discount'
-        _, api_key = requestor.request('delete', url)
-        self.refresh_from({'discount': None}, api_key, True)
-
     @property
     def cards(self):
         data = {
@@ -605,6 +585,20 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
         return self._back_accounts
 
+    @property
+    def subscriptions(self):
+        data = {
+            'object': 'list',
+            'url': Subscription.class_url({'customer': self.id}),
+            'count': 0,
+            'item_type': 'subscription'
+        }
+
+        if not hasattr(self, '_subscriptions'):
+            self._subscriptions = convert_to_openpay_object(data, self.api_key)
+
+        return self._subscriptions
+
 
 class Plan(CreateableAPIResource, DeletableAPIResource,
            UpdateableAPIResource, ListableAPIResource):
@@ -666,3 +660,19 @@ class Payout(CreateableAPIResource, ListableAPIResource):
 
 class Fee(CreateableAPIResource, ListableAPIResource):
     pass
+
+
+class Subscription(DeletableAPIResource, UpdateableAPIResource):
+    
+    def instance_url(self):
+        self.id = utf8(self.id)
+        if hasattr(self, 'customer'):
+            self.customer = utf8(self.customer)
+        else:
+            self.customer = utf8(self.customer_id)
+
+        base = Customer.class_url()
+        cust_extn = urllib.quote_plus(self.customer)
+        extn = urllib.quote_plus(self.id)
+
+        return "%s/%s/subscriptions/%s" % (base, cust_extn, extn)
