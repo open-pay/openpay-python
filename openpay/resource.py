@@ -289,7 +289,7 @@ class UpdateableAPIResource(APIResource):
             updated_params['metadata'] = self.serialize_metadata()
 
         if updated_params:
-            updated_params = copy.deepcopy(self)
+            updated_params = self.copy()
             if 'balance' in updated_params.keys() and 'status' in updated_params.keys():
                 updated_params.update({'status': None, 'balance': None})
             else:
