@@ -75,35 +75,35 @@ class BaseObjectTests(OpenpayUnitTestCase):
         self.assertEqual(4, obj.trans)
         self.assertEqual({'amount': 42}, obj._previous_metadata)
 
-    # def test_refresh_from_nested_object(self):
-    #     obj = openpay.resource.BaseObject.construct_from(
-    #         SAMPLE_INVOICE, 'key')
+#    def test_refresh_from_nested_object(self):
+#        obj = openpay.resource.BaseObject.construct_from(
+#            SAMPLE_INVOICE, 'key')
+#
+#        self.assertEqual(1, len(obj.lines.subscriptions))
+#        self.assertTrue(
+#            isinstance(obj.lines.subscriptions[0],
+#                       openpay.resource.BaseObject))
+#        self.assertEqual('month', obj.lines.subscriptions[0].plan.interval)
 
-    #     self.assertEqual(1, len(obj.lines.subscriptions))
-    #     self.assertTrue(
-    #         isinstance(obj.lines.subscriptions[0],
-    #                    openpay.resource.BaseObject))
-    #     self.assertEqual('month', obj.lines.subscriptions[0].plan.interval)
+#    def test_to_json(self):
+#        obj = openpay.resource.BaseObject.construct_from(
+#            SAMPLE_INVOICE, 'key')
+#
+#        self.check_invoice_data(json.loads(str(obj)))
 
-    # def test_to_json(self):
-    #     obj = openpay.resource.BaseObject.construct_from(
-    #         SAMPLE_INVOICE, 'key')
+    def check_invoice_data(self, data):
+        # Check rough structure
+        self.assertEqual(20, len(data.keys()))
+        self.assertEqual(3, len(data['lines'].keys()))
+        self.assertEqual(0, len(data['lines']['invoiceitems']))
+        self.assertEqual(1, len(data['lines']['subscriptions']))
 
-    #     self.check_invoice_data(json.loads(str(obj)))
-
-    # def check_invoice_data(self, data):
-    #     # Check rough structure
-    #     self.assertEqual(20, len(data.keys()))
-    #     self.assertEqual(3, len(data['lines'].keys()))
-    #     self.assertEqual(0, len(data['lines']['invoiceitems']))
-    #     self.assertEqual(1, len(data['lines']['subscriptions']))
-
-    #     # Check various data types
-    #     self.assertEqual(1338238728, data['date'])
-    #     self.assertEqual(None, data['next_payment_attempt'])
-    #     self.assertEqual(False, data['livemode'])
-    #     self.assertEqual('month',
-    #                      data['lines']['subscriptions'][0]['plan']['interval'])
+        # Check various data types
+        self.assertEqual(1338238728, data['date'])
+        self.assertEqual(None, data['next_payment_attempt'])
+        self.assertEqual(False, data['livemode'])
+        self.assertEqual('month',
+                         data['lines']['subscriptions'][0]['plan']['interval'])
 
 
 class ListObjectTests(OpenpayApiTestCase):
