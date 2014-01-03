@@ -282,7 +282,8 @@ class CustomerPlanTest(OpenpayTestCase):
         trial_end = datetime.datetime.now() + datetime.timedelta(days=15)
         customer = openpay.Customer.create(
             name="Miguel", last_name="Lopez", email="mlopez@example.com")
-        subscription = customer.subscriptions.create(plan_id=self.plan_obj.id, card=DUMMY_CARD, trial_end=trial_end.strftime('Y-m-d'))
+        subscription = customer.subscriptions.create(
+            plan_id=self.plan_obj.id, card=DUMMY_CARD, trial_end=trial_end.strftime('Y-m-d'))
         self.assertTrue(subscription.id)
 
     def test_integer_trial_end(self):
@@ -357,6 +358,60 @@ class PlanTest(OpenpayTestCase):
         # should load all the properties
         self.assertEqual(p.amount, plan.amount)
         p.delete()
+
+
+class PayoutTest(OpenpayTestCase):
+
+    def setUp(self):
+        super(PayoutTest, self).setUp()
+        self.customer = openpay.Customer.create(name="John", last_name="Doe", description="Test User",
+                                                email="johndoe@example.com")
+        self.bank_account = self.customer.bank_accounts.create(clabe="032180000118359719",
+                                                               alias="Cuenta principal",
+                                                               holder_name="John Doe")
+        self.card = self.customer.cards.create(
+            card_number="4111111111111111",
+            holder_name="Juan Perez",
+            expiration_year="20",
+            expiration_month="12",
+            cvv2="110",
+            address={
+                "city": "Querétaro",
+                "country_code": "MX",
+                "postal_code": "76900",
+                "line1": "Av 5 de Febrero",
+                "line2": "Roble 207",
+                "line3": "col carrillo",
+                "state": "Queretaro"
+            }
+        )
+
+        self.customer.charges.create(source_id=self.card.id, method="card",
+                                     amount=10000, description="Test Charge",
+                                     order_id=generate_order_id())
+
+    def test_create_payout_with_bank_account(self):
+        payout = self.customer.payouts.create(method='bank_account',
+                                              destination_id=self.bank_account.id,
+                                              amount="100",
+                                              description="First payout",
+                                              order_id=generate_order_id())
+        self.assertTrue(hasattr(payout, 'id'))
+        self.assertTrue(isinstance(payout, openpay.Payout))
+
+    def test_create_payout_with_card(self):
+        payout = self.customer.payouts.create(method="card",
+                                              destination_id=self.card.id,
+                                              amount=250,
+                                              description="Payout with card",
+                                              order_id=generate_order_id())
+        self.assertTrue(hasattr(payout, 'id'))
+        self.assertTrue(isinstance(payout, openpay.Payout))
+
+    def test_list_all_payout(self):
+        payout_list = self.customer.payouts.all()
+        self.assertTrue(isinstance(payout_list.data, list))
+        self.assertEqual(len(payout_list.data), payout_list.count)
 
 
 if __name__ == '__main__':
