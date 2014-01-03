@@ -5,7 +5,7 @@ from openpay import util
 from openpay.test.helper import (
     OpenpayUnitTestCase, OpenpayApiTestCase,
     MySingleton, MyListable, MyCreatable, MyUpdateable, MyDeletable,
-    MyResource, SAMPLE_INVOICE)
+    MyResource)
 
 
 class BaseObjectTests(OpenpayUnitTestCase):
