@@ -1,8 +1,4 @@
-"""
-File: resource.py
-Author: Carlos Aguilar
-Description: Define classes for every resource
-"""
+
 try:
     import json
 except ImportError:
