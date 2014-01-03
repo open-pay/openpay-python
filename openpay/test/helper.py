@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 import datetime
 import os
 import random
@@ -17,7 +18,7 @@ except ImportError as err:
     import simplejson as json
 
 def generate_order_id():
-  return 'oid-test-000{0}'.format(random.randint(2000, 3000))
+  return 'oid-test-{0}-{1}'.format(random.randint(1, 3000), str(time.time())[7:])
 
 NOW = datetime.datetime.now()
 
