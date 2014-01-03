@@ -20,7 +20,7 @@ if sys.version_info < (2, 6):
 install_requires = [requests]
 
 
-# Don't import stripe module here, since deps may not be installed
+# Don't import openpay module here, since deps may not be installed
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'openpay'))
 from version import VERSION
 
@@ -36,8 +36,8 @@ setup(name='openpay',
       version=VERSION,
       description='Openpay python bindings',
       author='Openpay',
-      author_email='support@openpay.mx',
-      url='https://openpay.mx/',
+      author_email='soporte@openpay.mx',
+      url='https://www.openpay.mx/',
       tests_require=['mock'],
       packages=['openpay', 'openpay.test'],
       package_data={'openpay': ['data/ca-certificates.crt', '../VERSION']},
