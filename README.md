@@ -13,6 +13,8 @@ Python bindings, you should run:
 
     pip install openpay
 
+See www.pip-installer.org/en/latest/index.html for instructions on installing pip.
+
 Implementation
 ==============
 
