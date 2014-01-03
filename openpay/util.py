@@ -1,8 +1,4 @@
-"""
-File: util.py
-Author: Carlos Aguilar
-Description: Utility functions to use in API Client
-"""
+
 import logging
 import sys
 
