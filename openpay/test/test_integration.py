@@ -325,7 +325,7 @@ class PlanTest(OpenpayTestCase):
 
     def test_create_plan(self):
         self.assertRaises(openpay.error.InvalidRequestError,
-                          openpay.Plan.create, amount=2500)
+                          openpay.Plan.create, amount=250)
         p = openpay.Plan.create(**DUMMY_PLAN)
         self.assertTrue(hasattr(p, 'amount'))
         self.assertTrue(hasattr(p, 'id'))
@@ -386,13 +386,13 @@ class PayoutTest(OpenpayTestCase):
         )
 
         self.customer.charges.create(source_id=self.card.id, method="card",
-                                     amount=10000, description="Test Charge",
+                                     amount=100, description="Test Charge",
                                      order_id=generate_order_id())
 
     def test_create_payout_with_bank_account(self):
         payout = self.customer.payouts.create(method='bank_account',
                                               destination_id=self.bank_account.id,
-                                              amount="100",
+                                              amount="10",
                                               description="First payout",
                                               order_id=generate_order_id())
         self.assertTrue(hasattr(payout, 'id'))
@@ -401,7 +401,7 @@ class PayoutTest(OpenpayTestCase):
     def test_create_payout_with_card(self):
         payout = self.customer.payouts.create(method="card",
                                               destination_id=self.card.id,
-                                              amount=250,
+                                              amount=25,
                                               description="Payout with card",
                                               order_id=generate_order_id())
         self.assertTrue(hasattr(payout, 'id'))
@@ -483,11 +483,11 @@ class FeeTest(OpenpayTestCase):
         )
 
         self.charge = self.customer.charges.create(source_id=self.card.id, method="card",
-                                                   amount=10000, description="Test Charge",
+                                                   amount=10, description="Test Charge",
                                                    order_id=generate_order_id())
 
     def test_fee_create(self):
-        fee = openpay.Fee.create(customer_id=self.customer.id, amount=50,
+        fee = openpay.Fee.create(customer_id=self.customer.id, amount=5,
                                  description="Test Fee", order_id=generate_order_id())
         self.assertTrue(isinstance(fee, openpay.Fee))
         self.assertTrue(hasattr(fee, 'id'))
@@ -526,13 +526,13 @@ class TransferTest(OpenpayTestCase):
         )
 
         self.charge = self.customer.charges.create(source_id=self.card.id, method="card",
-                                                   amount=10000, description="Test Charge",
+                                                   amount=100, description="Test Charge",
                                                    order_id=generate_order_id())
 
         self.second_customer = openpay.Customer.all().data[3]
 
     def test_transfer_create(self):
-        transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=100,
+        transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=10,
                                              description="Test transfer", order_id=generate_order_id())
         self.assertTrue(isinstance(transfer, openpay.Transfer))
         self.assertTrue(hasattr(transfer, 'id'))
@@ -544,7 +544,7 @@ class TransferTest(OpenpayTestCase):
         self.assertEqual(transfer_list.count, len(transfer_list.data))
 
     def test_transfer_retrieve(self):
-        transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=100,
+        transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=10,
                                              description="Test transfer", order_id=generate_order_id())
         transfer_list = self.customer.transfers.all()
         test_transfer = transfer_list.data[0]
