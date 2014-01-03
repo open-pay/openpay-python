@@ -500,5 +500,58 @@ class FeeTest(OpenpayTestCase):
         self.assertEqual(fee_list.count, len(fee_list.data))
 
 
+class TransferTest(OpenpayTestCase):
+
+    def setUp(self):
+        super(TransferTest, self).setUp()
+        self.customer = openpay.Customer.create(name="John", last_name="Doe", description="Test User",
+                                                email="johndoe@example.com")
+        self.bank_account = self.customer.bank_accounts.create(clabe="032180000118359719",
+                                                               alias="Cuenta principal",
+                                                               holder_name="John Doe")
+        self.card = self.customer.cards.create(
+            card_number="4111111111111111",
+            holder_name="Juan Perez",
+            expiration_year="20",
+            expiration_month="12",
+            cvv2="110",
+            address={
+                "city": "Querétaro",
+                "country_code": "MX",
+                "postal_code": "76900",
+                "line1": "Av 5 de Febrero",
+                "line2": "Roble 207",
+                "line3": "col carrillo",
+                "state": "Queretaro"
+            }
+        )
+
+        self.charge = self.customer.charges.create(source_id=self.card.id, method="card",
+                                                   amount=10000, description="Test Charge",
+                                                   order_id=generate_order_id())
+
+        self.second_customer = openpay.Customer.all().data[3]
+
+    def test_transfer_create(self):
+        transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=100,
+                                             description="Test transfer", order_id=generate_order_id())
+        self.assertTrue(isinstance(transfer, openpay.Transfer))
+        self.assertTrue(hasattr(transfer, 'id'))
+
+    def test_transfer_list_all(self):
+        transfer_list = self.customer.transfers.all()
+        self.assertTrue(isinstance(transfer_list, openpay.resource.ListObject))
+        self.assertTrue(isinstance(transfer_list.data, list))
+        self.assertEqual(transfer_list.count, len(transfer_list.data))
+
+    def test_transfer_retrieve(self):
+        transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=100,
+                                             description="Test transfer", order_id=generate_order_id())
+        transfer_list = self.customer.transfers.all()
+        test_transfer = transfer_list.data[0]
+        transfer = self.customer.transfers.retrieve(test_transfer.id)
+        self.assertTrue(isinstance(transfer, openpay.Transfer))
+
+
 if __name__ == '__main__':
     unittest.main()
