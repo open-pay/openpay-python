@@ -141,7 +141,7 @@ class CardErrorTest(OpenpayTestCase):
         EXPIRED_CARD['expiration_year'] = str(expiration_year)[2:]
         try:
             openpay.Charge.create(amount=100, method='card', description="Test Order", order_id="oid-00080", card=EXPIRED_CARD)
-        except openpay.error.CardError, e:
+        except openpay.error.CardError as e:
             self.assertEqual(402, e.http_status)
             self.assertTrue(isinstance(e.http_body, basestring))
             self.assertTrue(isinstance(e.json_body, dict))
