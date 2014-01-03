@@ -414,5 +414,48 @@ class PayoutTest(OpenpayTestCase):
         self.assertEqual(len(payout_list.data), payout_list.count)
 
 
+class CardTest(OpenpayTestCase):
+
+    def setUp(self):
+        super(CardTest, self).setUp()
+        self.customer = openpay.Customer.create(name="John", last_name="Doe", description="Test User",
+                                                email="johndoe@example.com")
+        self.card = self.customer.cards.create(
+            card_number="4111111111111111",
+            holder_name="Juan Perez",
+            expiration_year="20",
+            expiration_month="12",
+            cvv2="110",
+            address={
+                "city": "Querétaro",
+                "country_code": "MX",
+                "postal_code": "76900",
+                "line1": "Av 5 de Febrero",
+                "line2": "Roble 207",
+                "line3": "col carrillo",
+                "state": "Queretaro"
+            }
+        )
+
+    def test_card_created(self):
+        self.assertTrue(isinstance(self.card, openpay.Card))
+
+    def test_card_list_all(self):
+        card_list = self.customer.cards.all()
+        self.assertEqual(card_list.count, 1)
+        self.assertEqual(len(card_list.data), card_list.count)
+        self.assertTrue(isinstance(card_list, openpay.resource.ListObject))
+
+    def test_card_retrieve(self):
+        card_list = self.customer.cards.all()
+        card = card_list.data[0]
+        retrieved_card = self.customer.cards.retrieve(card.id)
+        self.assertEqual(card.id, retrieved_card.id)
+
+    def test_card_delete(self):
+        self.card.delete()
+        self.assertEqual(self.card.keys(), [])
+
+
 if __name__ == '__main__':
     unittest.main()
