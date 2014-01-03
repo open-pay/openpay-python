@@ -2,7 +2,6 @@
 Openpay python bindings
 
 API docs http://www.openpay.mx/api-v1/
-Author: Carlos Aguilar <caguilar@dwdandsolutions.com>
 """
 
 api_key = None
