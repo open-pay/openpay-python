@@ -13,8 +13,7 @@ import openpay
 
 from openpay.test.helper import (
     OpenpayTestCase,
-    NOW, DUMMY_CARD, DUMMY_CHARGE, DUMMY_PLAN, DUMMY_COUPON,
-    DUMMY_RECIPIENT, DUMMY_TRANSFER, DUMMY_INVOICE_ITEM, generate_order_id)
+    NOW, DUMMY_CARD, DUMMY_CHARGE, DUMMY_PLAN, generate_order_id)
 
 
 class FunctionalTests(OpenpayTestCase):
