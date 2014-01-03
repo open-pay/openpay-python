@@ -198,8 +198,7 @@ class CustomerTest(OpenpayTestCase):
         self.assertTrue(isinstance(customers.data, list))
 
     def test_list_charges(self):
-        customer = openpay.Customer.create(name="Miguel Lopez", email="mlopez@example.com", description="foo bar",
-                                           card=DUMMY_CARD)
+        customer = openpay.Customer.create(name="Miguel Lopez", email="mlopez@example.com", description="foo bar")
 
         customer.charges.create(
             amount=100, method="card", description="Customer test charge", order_id=generate_order_id(), card=DUMMY_CARD)
@@ -282,21 +281,18 @@ class CustomerPlanTest(OpenpayTestCase):
     def test_datetime_trial_end(self):
         trial_end = datetime.datetime.now() + datetime.timedelta(days=15)
         customer = openpay.Customer.create(
-            name="Miguel", last_name="Lopez", email="mlopez@example.com",
-            plan=DUMMY_PLAN['id'], card=DUMMY_CARD,
-            trial_end=trial_end.strftime('Y-m-d'))
-        self.assertTrue(customer.id)
+            name="Miguel", last_name="Lopez", email="mlopez@example.com")
+        subscription = customer.subscriptions.create(plan_id=self.plan_obj.id, card=DUMMY_CARD, trial_end=trial_end.strftime('Y-m-d'))
+        self.assertTrue(subscription.id)
 
     def test_integer_trial_end(self):
         trial_end_dttm = datetime.datetime.now() + datetime.timedelta(days=15)
         trial_end_int = int(time.mktime(trial_end_dttm.timetuple()))
         customer = openpay.Customer.create(name="Miguel",
                                            last_name="Lopez",
-                                           email="mlopez@example.com",
-                                           plan=DUMMY_PLAN['id'],
-                                           card=DUMMY_CARD,
-                                           trial_end=trial_end_int)
-        self.assertTrue(customer.id)
+                                           email="mlopez@example.com")
+        subscription = customer.subscriptions.create(plan_id=self.plan_obj.id, card=DUMMY_CARD, trial_end=trial_end_int)
+        self.assertTrue(subscription.id)
 
 
 class InvalidRequestErrorTest(OpenpayTestCase):
