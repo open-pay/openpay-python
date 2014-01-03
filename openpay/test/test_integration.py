@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from future.builtins import zip
+from future.builtins import int
+from future.builtins import str
+from future.builtins import super
+
 import datetime
 import os
 import sys
@@ -80,7 +86,7 @@ class FunctionalTests(OpenpayTestCase):
         # Make sure unicode requests can be sent
         self.assertRaises(openpay.error.InvalidRequestError,
                           openpay.Charge.retrieve_as_merchant,
-                          id=u'☃'.encode('utf-8'))
+                          id="{0}".format('☃'))
 
     # def test_none_values(self):
     #     customer = openpay.Customer.create(name=None, last_name=None)
@@ -126,7 +132,7 @@ class AuthenticationErrorTest(OpenpayTestCase):
             openpay.Customer.create()
         except openpay.error.AuthenticationError as e:
             self.assertEqual(401, e.http_status)
-            self.assertTrue(isinstance(e.http_body, basestring))
+            self.assertTrue(isinstance(e.http_body, str))
             self.assertTrue(isinstance(e.json_body, dict))
         finally:
             openpay.api_key = key
@@ -143,7 +149,7 @@ class CardErrorTest(OpenpayTestCase):
             openpay.Charge.create(amount=100, method='card', description="Test Order", order_id="oid-00080", card=EXPIRED_CARD)
         except openpay.error.CardError as e:
             self.assertEqual(402, e.http_status)
-            self.assertTrue(isinstance(e.http_body, basestring))
+            self.assertTrue(isinstance(e.http_body, str))
             self.assertTrue(isinstance(e.json_body, dict))
 
 # Note that these are in addition to the core functional charge tests
@@ -300,17 +306,17 @@ class InvalidRequestErrorTest(OpenpayTestCase):
     def test_nonexistent_object(self):
         try:
             openpay.Charge.retrieve('invalid')
-        except openpay.error.InvalidRequestError, e:
+        except openpay.error.InvalidRequestError as e:
             self.assertEqual(404, e.http_status)
-            self.assertTrue(isinstance(e.http_body, basestring))
+            self.assertTrue(isinstance(e.http_body, str))
             self.assertTrue(isinstance(e.json_body, dict))
 
     def test_invalid_data(self):
         try:
             openpay.Charge.create()
-        except openpay.error.InvalidRequestError, e:
+        except openpay.error.InvalidRequestError as e:
             self.assertEqual(400, e.http_status)
-            self.assertTrue(isinstance(e.http_body, basestring))
+            self.assertTrue(isinstance(e.http_body, str))
             self.assertTrue(isinstance(e.json_body, dict))
 
 
@@ -331,7 +337,7 @@ class PlanTest(OpenpayTestCase):
         self.assertTrue(hasattr(p, 'id'))
         self.assertEqual(DUMMY_PLAN['amount'], p.amount)
         p.delete()
-        self.assertEqual(p.keys(), [])
+        self.assertEqual(list(p.keys()), [])
         # self.assertTrue(p.deleted)
 
     def test_update_plan(self):
@@ -453,7 +459,7 @@ class CardTest(OpenpayTestCase):
 
     def test_card_delete(self):
         self.card.delete()
-        self.assertEqual(self.card.keys(), [])
+        self.assertEqual(list(self.card.keys()), [])
 
 
 class FeeTest(OpenpayTestCase):
@@ -533,7 +539,7 @@ class TransferTest(OpenpayTestCase):
 
     def test_transfer_create(self):
         transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=10,
-                                             description="Test transfer", order_id=generate_order_id())
+                                                  description="Test transfer", order_id=generate_order_id())
         self.assertTrue(isinstance(transfer, openpay.Transfer))
         self.assertTrue(hasattr(transfer, 'id'))
 
@@ -545,7 +551,7 @@ class TransferTest(OpenpayTestCase):
 
     def test_transfer_retrieve(self):
         transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=10,
-                                             description="Test transfer", order_id=generate_order_id())
+                                                  description="Test transfer", order_id=generate_order_id())
         transfer_list = self.customer.transfers.all()
         test_transfer = transfer_list.data[0]
         transfer = self.customer.transfers.retrieve(test_transfer.id)

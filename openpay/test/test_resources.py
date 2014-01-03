@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins import super
 import json
 import openpay
 from openpay import util
@@ -93,8 +96,8 @@ class BaseObjectTests(OpenpayUnitTestCase):
 
     def check_invoice_data(self, data):
         # Check rough structure
-        self.assertEqual(20, len(data.keys()))
-        self.assertEqual(3, len(data['lines'].keys()))
+        self.assertEqual(20, len(list(data.keys())))
+        self.assertEqual(3, len(list(data['lines'].keys())))
         self.assertEqual(0, len(data['lines']['invoiceitems']))
         self.assertEqual(1, len(data['lines']['subscriptions']))
 
@@ -119,9 +122,11 @@ class ListObjectTests(OpenpayApiTestCase):
 
         self.mock_response([{
             'foo': 'bar',
+            'object': 'charge'
         }])
 
     def assertResponse(self, res):
+        print(type(res.data[0]))
         self.assertTrue(isinstance(res.data[0], openpay.Charge))
         self.assertEqual('bar', res.data[0].foo)
 
@@ -160,7 +165,7 @@ class APIResourceTests(OpenpayApiTestCase):
 
         res = MyResource.retrieve('foo*', myparam=5)
 
-        url = '/v1/{0}/myresources/foo%2A'.format(openpay.merchant_id)
+        url = '/v1/{0}/myresources/foo*'.format(openpay.merchant_id)
         self.requestor_mock.request.assert_called_with(
             'get', url, {'myparam': 5}
         )

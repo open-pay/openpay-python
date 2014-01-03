@@ -1,11 +1,13 @@
+from __future__ import unicode_literals
 
 try:
     import json
 except ImportError:
     import simplejson as json
 
-import copy
-import urllib
+from future.builtins import super
+from future.builtins import hex
+from future.builtins import str
 import openpay
 from openpay import api, error
 from openpay.util import utf8, logger
@@ -23,8 +25,8 @@ def convert_to_openpay_object(resp, api_key, item_type=None):
         resp = resp.copy()
         klass_name = resp.get('object')
         if not klass_name and item_type:
-            klass_name = item_type
-        if isinstance(klass_name, basestring):
+            klass_name = str(item_type)
+        if isinstance(klass_name, str):
             klass = types.get(klass_name, BaseObject)
         else:
             klass = BaseObject
@@ -86,7 +88,7 @@ class BaseObject(dict):
                     "the result returned by Openpay's API, probably as a "
                     "result of a save().  The attributes currently "
                     "available on this object are: %s" %
-                    (k, k, ', '.join(self.keys())))
+                    (k, k, ', '.join(list(self.keys()))))
             else:
                 raise err
 
@@ -118,7 +120,7 @@ class BaseObject(dict):
 
         self._transient_values = self._transient_values - set(values)
 
-        for k, v in values.iteritems():
+        for k, v in values.items():
             super(BaseObject, self).__setitem__(
                 k, convert_to_openpay_object(v, api_key))
 
@@ -130,9 +132,10 @@ class BaseObject(dict):
 
         requestor = api.APIClient(self.api_key)
         response, api_key = requestor.request(method, url, params)
+
         if isinstance(response, list):
             for item in response:
-                if 'object' not in item.keys():
+                if 'object' not in list(item.keys()):
                     item.update({'object': self.get('item_type')})
 
             data = {
@@ -145,15 +148,19 @@ class BaseObject(dict):
 
             response = data
 
+        if isinstance(response, dict) and self.get('item_type'):
+            if 'object' not in list(response.keys()):
+                response.update({'object': self.get('item_type')})
+
         return convert_to_openpay_object(response, api_key, self.get('item_type'))
 
     def __repr__(self):
         ident_parts = [type(self).__name__]
 
-        if isinstance(self.get('object'), basestring):
+        if isinstance(self.get('object'), str):
             ident_parts.append(self.get('object').encode('utf-8'))
 
-        if isinstance(self.get('id'), basestring):
+        if isinstance(self.get('id'), str):
             ident_parts.append('id=%s' % (self.get('id').encode('utf8'),))
 
         return '<%s at %s> JSON: %s' % (
@@ -191,7 +198,7 @@ class APIResource(BaseObject):
     def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
-        if params and 'customer' in params.keys():
+        if params and 'customer' in list(params.keys()):
             return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
@@ -204,11 +211,11 @@ class APIResource(BaseObject):
                 'has invalid ID: %r' % (type(self).__name__, id), 'id')
         id = utf8(id)
         params = None
-        if 'customer' in self._retrieve_params.keys():
+        if 'customer' in list(self._retrieve_params.keys()):
             params = {'customer': self._retrieve_params.get('customer')}
 
         base = self.class_url(params)
-        extn = urllib.quote_plus(id)
+        extn = id
         return "%s/%s" % (base, extn)
 
 
@@ -223,7 +230,7 @@ class ListObject(BaseObject):
     def retrieve(self, id, **params):
         base = self.get('url')
         id = utf8(id)
-        extn = urllib.quote_plus(id)
+        extn = id
         url = "%s/%s" % (base, extn)
 
         return self.request('get', url, params)
@@ -255,7 +262,7 @@ class ListableAPIResource(APIResource):
         response, api_key = requestor.request('get', url, params)
         klass_name = cls.__name__.lower()
         for item in response:
-            if 'object' not in item.keys():
+            if 'object' not in list(item.keys()):
                 item.update({'object': klass_name})
 
         data = {
@@ -290,7 +297,7 @@ class UpdateableAPIResource(APIResource):
 
         if updated_params:
             updated_params = self.copy()
-            if 'balance' in updated_params.keys() and 'status' in updated_params.keys():
+            if 'balance' in list(updated_params.keys()) and 'status' in list(updated_params.keys()):
                 updated_params.update({'status': None, 'balance': None})
             else:
                 updated_params.update({'status': None})
@@ -341,7 +348,7 @@ class Card(ListableAPIResource, UpdateableAPIResource, DeletableAPIResource, Cre
     def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
-        if params and 'customer' in params.keys():
+        if params and 'customer' in list(params.keys()):
             return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
@@ -354,8 +361,8 @@ class Card(ListableAPIResource, UpdateableAPIResource, DeletableAPIResource, Cre
             self.customer = utf8(self.customer_id)
 
         base = Customer.class_url()
-        cust_extn = urllib.quote_plus(self.customer)
-        extn = urllib.quote_plus(self.id)
+        cust_extn = self.customer
+        extn = self.id
 
         return "%s/%s/cards/%s" % (base, cust_extn, extn)
 
@@ -376,7 +383,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
     def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
-        if params and 'customer' in params.keys():
+        if params and 'customer' in list(params.keys()):
             return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
@@ -386,19 +393,19 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 
         if hasattr(self, '_as_merchant'):
             base = Charge.class_url()
-            extn = urllib.quote_plus(self.id)
+            extn = self.id
             url = "{0}/{1}".format(base, extn)
         else:
             self.customer = utf8(self.customer_id)
             base = Customer.class_url()
-            cust_extn = urllib.quote_plus(self.customer)
-            extn = urllib.quote_plus(self.id)
+            cust_extn = self.customer
+            extn = self.id
             url = "%s/%s/charges/%s" % (base, cust_extn, extn)
 
         return url
 
     def refund(self, **params):
-        if 'merchant' in params.keys():
+        if 'merchant' in list(params.keys()):
             self._as_merchant = True
         else:
             self._as_merchant = False
@@ -409,7 +416,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         return self
 
     def capture(self, **params):
-        if 'merchant' in params.keys():
+        if 'merchant' in list(params.keys()):
             self._as_merchant = True
             del params['merchant']
         else:
@@ -659,7 +666,7 @@ class Fee(CreateableAPIResource, ListableAPIResource):
 
 
 class Subscription(DeletableAPIResource, UpdateableAPIResource):
-    
+
     def instance_url(self):
         self.id = utf8(self.id)
         if hasattr(self, 'customer'):
@@ -668,7 +675,7 @@ class Subscription(DeletableAPIResource, UpdateableAPIResource):
             self.customer = utf8(self.customer_id)
 
         base = Customer.class_url()
-        cust_extn = urllib.quote_plus(self.customer)
-        extn = urllib.quote_plus(self.id)
+        cust_extn = self.customer
+        extn = self.id
 
         return "%s/%s/subscriptions/%s" % (base, cust_extn, extn)
