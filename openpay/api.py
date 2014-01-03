@@ -102,8 +102,8 @@ class APIClient(object):
             raise error.AuthenticationError(
                 'No API key provided. (HINT: set your API key using '
                 '"openpay.api_key = <API-KEY>"). You can generate API keys '
-                'from the Stripe web interface.  See https://openpay.mx/api '
-                'for details, or email support@openpay.mx if you have any '
+                'from the Openpay Dashboard.  See http://docs.openpay.mx '
+                'for details, or email soporte@openpay.mx if you have any '
                 'questions.')
 
         abs_url = "{0}{1}".format(openpay.get_api_base(), url)
@@ -119,7 +119,7 @@ class APIClient(object):
         else:
             raise error.APIConnectionError(
                 'Unrecognized HTTP method %r.  This may indicate a bug in the '
-                'Openpay bindings.  Please contact support@openpay.mx for '
+                'Openpay bindings.  Please contact soportesu@openpay.mx for '
                 'assistance.' % (method,))
 
         ua = {
