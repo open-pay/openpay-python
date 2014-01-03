@@ -13,4 +13,4 @@ install:
   - python setup.py install
 script:
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then flake8 openpay; fi
-  - python -W always setup.py test
+  - python setup.py test
