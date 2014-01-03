@@ -124,7 +124,7 @@ class AuthenticationErrorTest(OpenpayTestCase):
         try:
             openpay.api_key = 'invalid'
             openpay.Customer.create()
-        except openpay.error.AuthenticationError, e:
+        except openpay.error.AuthenticationError as e:
             self.assertEqual(401, e.http_status)
             self.assertTrue(isinstance(e.http_body, basestring))
             self.assertTrue(isinstance(e.json_body, dict))
