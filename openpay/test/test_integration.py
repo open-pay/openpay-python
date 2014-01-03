@@ -187,8 +187,8 @@ class ChargeTest(OpenpayTestCase):
 
         self.assertFalse(hasattr(charge, 'captured'))
 
-        self.assertTrue(charge is charge.capture())
-        self.assertTrue(openpay.Charge.retrieve_as_merchant(charge.id).captured)
+        self.assertTrue(charge is charge.capture(merchant=True))
+        self.assertEqual(openpay.Charge.retrieve_as_merchant(charge.id).status, 'completed')
 
 
 class CustomerTest(OpenpayTestCase):
@@ -455,6 +455,49 @@ class CardTest(OpenpayTestCase):
     def test_card_delete(self):
         self.card.delete()
         self.assertEqual(self.card.keys(), [])
+
+
+class FeeTest(OpenpayTestCase):
+
+    def setUp(self):
+        super(FeeTest, self).setUp()
+        self.customer = openpay.Customer.create(name="John", last_name="Doe", description="Test User",
+                                                email="johndoe@example.com")
+        self.bank_account = self.customer.bank_accounts.create(clabe="032180000118359719",
+                                                               alias="Cuenta principal",
+                                                               holder_name="John Doe")
+        self.card = self.customer.cards.create(
+            card_number="4111111111111111",
+            holder_name="Juan Perez",
+            expiration_year="20",
+            expiration_month="12",
+            cvv2="110",
+            address={
+                "city": "Querétaro",
+                "country_code": "MX",
+                "postal_code": "76900",
+                "line1": "Av 5 de Febrero",
+                "line2": "Roble 207",
+                "line3": "col carrillo",
+                "state": "Queretaro"
+            }
+        )
+
+        self.charge = self.customer.charges.create(source_id=self.card.id, method="card",
+                                                   amount=10000, description="Test Charge",
+                                                   order_id=generate_order_id())
+
+    def test_fee_create(self):
+        fee = openpay.Fee.create(customer_id=self.customer.id, amount=50,
+                                 description="Test Fee", order_id=generate_order_id())
+        self.assertTrue(isinstance(fee, openpay.Fee))
+        self.assertTrue(hasattr(fee, 'id'))
+
+    def test_fee_list_all(self):
+        fee_list = openpay.Fee.all()
+        self.assertTrue(isinstance(fee_list, openpay.resource.ListObject))
+        self.assertTrue(isinstance(fee_list.data, list))
+        self.assertEqual(fee_list.count, len(fee_list.data))
 
 
 if __name__ == '__main__':
