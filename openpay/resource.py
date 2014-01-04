@@ -300,7 +300,8 @@ class UpdateableAPIResource(APIResource):
 
         if updated_params:
             updated_params = self.copy()
-            if 'balance' in list(updated_params.keys()) and 'status' in list(updated_params.keys()):
+            if ('balance' in list(updated_params.keys())
+                    and 'status' in list(updated_params.keys())):
                 updated_params.update({'status': None, 'balance': None})
             else:
                 updated_params.update({'status': None})
