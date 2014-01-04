@@ -12,13 +12,11 @@ from mock import patch, Mock
 
 import openpay
 
-try:
-    import json
-except ImportError as err:
-    import simplejson as json
 
 def generate_order_id():
-  return 'oid-test-{0}-{1}'.format(random.randint(1, 3000), str(time.time())[7:])
+
+    return 'oid-test-{0}-{1}'.format(
+        random.randint(1, 3000), str(time.time())[7:])
 
 NOW = datetime.datetime.now()
 
@@ -29,13 +27,13 @@ DUMMY_CARD = {
     'expiration_year': str(NOW.year + 4)[2:],
     "cvv2": "110",
     "address": {
-      "line1":"Av. 5 de febrero No. 1080 int Roble 207",
-      "line2":"Carrillo puerto",
-      "line3":"Zona industrial carrillo puerto",
-      "postal_code":"06500",
-      "state":"Querétaro",
-      "city":"Querétaro",
-      "country_code":"MX"
+        "line1": "Av. 5 de febrero No. 1080 int Roble 207",
+        "line2": "Carrillo puerto",
+        "line3": "Zona industrial carrillo puerto",
+        "postal_code": "06500",
+        "state": "Querétaro",
+        "city": "Querétaro",
+        "country_code": "MX"
     }
 }
 DUMMY_CHARGE = {

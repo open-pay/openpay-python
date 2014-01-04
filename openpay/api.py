@@ -1,8 +1,8 @@
 import datetime
 import calendar
 import time
-import warnings
-import urllib
+#import warnings
+#import urllib
 import urlparse
 import platform
 import json
@@ -72,15 +72,22 @@ class APIClient(object):
 
         if rcode in [400, 404]:
             raise error.InvalidRequestError(
-                "{0}, error code: {1}".format(err.get('description'), resp['error_code']), err.get('request_id'), rbody, rcode, resp)
+                "{0}, error code: {1}".format(err.get('description'),
+                                              resp['error_code']),
+                err.get('request_id'),
+                rbody, rcode, resp)
         elif rcode == 401:
             raise error.AuthenticationError(
                 err.get('description'), rbody, rcode, resp)
         elif rcode == 402:
-            raise error.CardError(err.get('description'), err.get('request_id'),
-                                  err.get('error_code'), rbody, rcode, resp)
+            raise error.CardError(
+                err.get('description'), err.get('request_id'),
+                err.get('error_code'), rbody, rcode, resp)
         else:
-            raise error.APIError("{0}, error code: {1}".format(err.get('description'), resp['error_code']), rbody, rcode, resp)
+            raise error.APIError(
+                "{0}, error code: {1}".format(err.get(
+                    'description'),
+                    resp['error_code']), rbody, rcode, resp)
 
     def request_raw(self, method, url, params=None):
         """

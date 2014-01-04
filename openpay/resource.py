@@ -4,7 +4,6 @@ try:
 except ImportError:
     import simplejson as json
 
-import copy
 import urllib
 import openpay
 from openpay import api, error
@@ -69,8 +68,8 @@ class BaseObject(dict):
             raise ValueError(
                 "You cannot set %s to an empty string. "
                 "We interpret empty strings as None in requests."
-                "You may set %s.%s = None to delete the property" % (
-                k, str(self), v))
+                "You may set %s.%s = None to delete the property" %
+                (k, str(self), v))
 
         super(BaseObject, self).__setitem__(k, v)
         self._unsaved_values.add(k)
@@ -145,7 +144,8 @@ class BaseObject(dict):
 
             response = data
 
-        return convert_to_openpay_object(response, api_key, self.get('item_type'))
+        return convert_to_openpay_object(
+            response, api_key, self.get('item_type'))
 
     def __repr__(self):
         ident_parts = [type(self).__name__]
@@ -192,7 +192,8 @@ class APIResource(BaseObject):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
         if params and 'customer' in params.keys():
-            return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
+            return "/v1/{0}/customers/{1}/{2}s".format(
+                merchant_id, params.get('customer'), cls_name)
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
 
@@ -233,7 +234,8 @@ class SingletonAPIResource(APIResource):
 
     @classmethod
     def retrieve(cls, api_key=None):
-        return super(SingletonAPIResource, cls).retrieve(None, api_key=api_key)
+        return super(SingletonAPIResource, cls).retrieve(
+            None, api_key=api_key)
 
     @classmethod
     def class_url(cls):
@@ -290,7 +292,7 @@ class UpdateableAPIResource(APIResource):
 
         if updated_params:
             updated_params = self.copy()
-            if 'balance' in updated_params.keys() and 'status' in updated_params.keys():
+            if ('balance' in updated_params.keys()) and ('status' in updated_params.keys()):
                 updated_params.update({'status': None, 'balance': None})
             else:
                 updated_params.update({'status': None})
@@ -335,14 +337,16 @@ class DeletableAPIResource(APIResource):
 # API objects
 
 
-class Card(ListableAPIResource, UpdateableAPIResource, DeletableAPIResource, CreateableAPIResource):
+class Card(ListableAPIResource, UpdateableAPIResource,
+           DeletableAPIResource, CreateableAPIResource):
 
     @classmethod
     def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
         if params and 'customer' in params.keys():
-            return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
+            return "/v1/{0}/customers/{1}/{2}s".format(
+                merchant_id, params.get('customer'), cls_name)
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
 
@@ -377,7 +381,8 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         merchant_id = openpay.merchant_id
         cls_name = cls.class_name()
         if params and 'customer' in params.keys():
-            return "/v1/{0}/customers/{1}/{2}s".format(merchant_id, params.get('customer'), cls_name)
+            return "/v1/{0}/customers/{1}/{2}s".format(
+                merchant_id, params.get('customer'), cls_name)
         else:
             return "/v1/%s/%ss" % (merchant_id, cls_name)
 
@@ -427,7 +432,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         return self.dispute
 
     def close_dispute(self):
-        rrequestor = api.APIClient(self.api_key)
+        requestor = api.APIClient(self.api_key)
         url = self.instance_url() + '/dispute/close'
         response, api_key = requestor.request('post', url, {})
         self.refresh_from({'dispute': response}, api_key, True)
@@ -435,9 +440,6 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 
     @classmethod
     def as_merchant(cls):
-        """
-        Get a list of all charges as a merchant
-        """
 
         params = {}
         if hasattr(cls, 'api_key'):
@@ -540,21 +542,6 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
     @property
     def payouts(self):
-        """
-        Create a new payout as customer:
-
-        Required params:
-
-        `method`: possible values ['card', 'bank_account']
-
-        `destination_id`: Bank account or Card ID
-
-        `amount`: The charge amount
-
-        `description`: Charge description
-
-        `order_id`: Unique between all transactions
-        """
         data = {
             'object': 'list',
             'url': Payout.class_url({'customer': self.id}),
@@ -606,7 +593,8 @@ class Transfer(CreateableAPIResource, UpdateableAPIResource,
     pass
 
 
-class BankAccount(CreateableAPIResource, UpdateableAPIResource, DeletableAPIResource, ListableAPIResource):
+class BankAccount(CreateableAPIResource, UpdateableAPIResource,
+                  DeletableAPIResource, ListableAPIResource):
     pass
 
 
@@ -614,21 +602,6 @@ class Payout(CreateableAPIResource, ListableAPIResource):
 
     @classmethod
     def create_as_merchant(cls, **params):
-        """
-        Create a new payout as merchant:
-
-        Required params:
-
-        `method`: possible values ['card', 'bank_account']
-
-        `destination_id`: Bank account or Card ID
-
-        `amount`: The charge amount
-
-        `description`: Charge description
-
-        `order_id`: Unique between all transactions
-        """
         if hasattr(cls, 'api_key'):
             api_key = cls.api_key
         else:
@@ -659,7 +632,7 @@ class Fee(CreateableAPIResource, ListableAPIResource):
 
 
 class Subscription(DeletableAPIResource, UpdateableAPIResource):
-    
+
     def instance_url(self):
         self.id = utf8(self.id)
         if hasattr(self, 'customer'):

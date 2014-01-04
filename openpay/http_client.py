@@ -3,7 +3,7 @@ import sys
 import textwrap
 import warnings
 
-from openpay import error, util
+from openpay import error
 
 # - Requests is the preferred HTTP library
 # - Google App Engine has urlfetch
@@ -141,7 +141,8 @@ class Urllib2Client(HTTPClient):
             post_data = post_data.encode('utf-8')
 
         req = urllib2.Request(url, post_data, headers)
-        base64string = base64.encodestring('%s:%s' % (user, '')).replace('\n', '')
+        base64string = base64.encodestring(
+            '%s:%s' % (user, '')).replace('\n', '')
         req.add_header("Authorization", "Basic %s" % base64string)
 
         if method not in ('get', 'post'):

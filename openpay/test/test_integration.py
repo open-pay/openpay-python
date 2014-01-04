@@ -4,9 +4,8 @@ import os
 import sys
 import time
 import unittest
-import random
 
-from mock import patch, Mock
+from mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 import openpay
@@ -37,8 +36,10 @@ class FunctionalTests(OpenpayTestCase):
         self.client_patcher.stop()
 
     def test_dns_failure(self):
-        self.patched_api_base = patch('openpay.get_api_base', lambda: 'https://my-invalid-domain.ireallywontresolve/v1')
-        get_api_base_mock = self.patched_api_base.start()
+        self.patched_api_base = patch(
+            'openpay.get_api_base',
+            lambda: 'https://my-invalid-domain.ireallywontresolve/v1')
+       #get_api_base_mock = self.patched_api_base.start()
         try:
             self.assertRaises(openpay.error.APIConnectionError,
                               openpay.Customer.create)
@@ -63,7 +64,8 @@ class FunctionalTests(OpenpayTestCase):
         self.assertRaises(AttributeError, lambda: charge2.junk)
 
     def test_list_accessors(self):
-        customer = openpay.Customer.create(name="Miguel Lopez", email="mlopez@example.com")
+        customer = openpay.Customer.create(
+            name="Miguel Lopez", email="mlopez@example.com")
         self.assertEqual(customer['creation_date'], customer.creation_date)
         customer['foo'] = 'bar'
         self.assertEqual(customer.foo, 'bar')
@@ -74,7 +76,8 @@ class FunctionalTests(OpenpayTestCase):
         EXPIRED_CARD['expiration_month'] = NOW.month
         EXPIRED_CARD['expiration_year'] = str(expiration_year)[2:]
         self.assertRaises(openpay.error.CardError, openpay.Charge.create,
-                          amount=100, method='card', description="Test Order", order_id="oid-00080", card=EXPIRED_CARD)
+                          amount=100, method='card', description="Test Order",
+                          order_id="oid-00080", card=EXPIRED_CARD)
 
     def test_unicode(self):
         # Make sure unicode requests can be sent
@@ -140,7 +143,10 @@ class CardErrorTest(OpenpayTestCase):
         EXPIRED_CARD['expiration_month'] = NOW.month
         EXPIRED_CARD['expiration_year'] = str(expiration_year)[2:]
         try:
-            openpay.Charge.create(amount=100, method='card', description="Test Order", order_id="oid-00080", card=EXPIRED_CARD)
+            openpay.Charge.create(amount=100, method='card',
+                                  description="Test Order",
+                                  order_id="oid-00080",
+                                  card=EXPIRED_CARD)
         except openpay.error.CardError as e:
             self.assertEqual(402, e.http_status)
             self.assertTrue(isinstance(e.http_body, basestring))
@@ -155,8 +161,10 @@ class ChargeTest(OpenpayTestCase):
         super(ChargeTest, self).setUp()
 
     def test_charge_list_all(self):
-        charge_list = openpay.Charge.all(creation={'lte': NOW.strftime('Y-m-d')})
-        list_result = charge_list.all(creation={'lte': NOW.strftime('Y-m-d')})
+        charge_list = openpay.Charge.all(
+            creation={'lte': NOW.strftime('Y-m-d')})
+        list_result = charge_list.all(
+            creation={'lte': NOW.strftime('Y-m-d')})
 
         self.assertEqual(len(charge_list.data),
                          len(list_result.data))
@@ -187,7 +195,9 @@ class ChargeTest(OpenpayTestCase):
         self.assertFalse(hasattr(charge, 'captured'))
 
         self.assertTrue(charge is charge.capture(merchant=True))
-        self.assertEqual(openpay.Charge.retrieve_as_merchant(charge.id).status, 'completed')
+        self.assertEqual(
+            openpay.Charge.retrieve_as_merchant(charge.id).status,
+            'completed')
 
 
 class CustomerTest(OpenpayTestCase):
@@ -197,21 +207,30 @@ class CustomerTest(OpenpayTestCase):
         self.assertTrue(isinstance(customers.data, list))
 
     def test_list_charges(self):
-        customer = openpay.Customer.create(name="Miguel Lopez", email="mlopez@example.com", description="foo bar")
+        customer = openpay.Customer.create(
+            name="Miguel Lopez",
+            email="mlopez@example.com",
+            description="foo bar")
 
         customer.charges.create(
-            amount=100, method="card", description="Customer test charge", order_id=generate_order_id(), card=DUMMY_CARD)
+            amount=100, method="card",
+            description="Customer test charge",
+            order_id=generate_order_id(), card=DUMMY_CARD)
 
         self.assertEqual(1,
                          len(customer.charges.all().data))
 
     def test_unset_description(self):
-        customer = openpay.Customer.create(name="Miguel", last_name="Lopez", email="mlopez@example.com", description="foo bar")
+        customer = openpay.Customer.create(
+            name="Miguel", last_name="Lopez",
+            email="mlopez@example.com", description="foo bar")
 
         customer.description = None
         customer.save()
 
-        self.assertEqual(None, customer.retrieve(customer.id).get('description'))
+        self.assertEqual(
+            None,
+            customer.retrieve(customer.id).get('description'))
 
     def test_cannot_set_empty_string(self):
         customer = openpay.Customer()
@@ -226,15 +245,6 @@ class CustomerTest(OpenpayTestCase):
 
     #     self.assertEqual('Python bindings test',
     #                      customer.cards.retrieve(card.id).name)
-
-
-class TransferTest(OpenpayTestCase):
-
-    def test_list_transfers(self):
-        customer = openpay.Customer.retrieve("amce5ycvwycfzyarjf8l")
-        transfers = customer.transfers.all()
-        self.assertTrue(isinstance(transfers.data, list))
-        self.assertTrue(isinstance(transfers.data[0], openpay.Transfer))
 
 
 class CustomerPlanTest(OpenpayTestCase):
@@ -258,8 +268,12 @@ class CustomerPlanTest(OpenpayTestCase):
         self.assertRaises(openpay.error.InvalidRequestError,
                           openpay.Customer.create,
                           plan=DUMMY_PLAN['id'])
-        customer = openpay.Customer.create(name="Miguel", last_name="Lopez", email="mlopez@example.com")
-        subscription = customer.subscriptions.create(plan_id=self.plan_obj.id, trial_days="0", card=DUMMY_CARD)
+        customer = openpay.Customer.create(
+            name="Miguel", last_name="Lopez", email="mlopez@example.com")
+
+        subscription = customer.subscriptions.create(
+            plan_id=self.plan_obj.id, trial_days="0", card=DUMMY_CARD)
+
         self.assertTrue(isinstance(subscription, openpay.Subscription))
         subscription.delete()
         customer.delete()
@@ -267,9 +281,11 @@ class CustomerPlanTest(OpenpayTestCase):
         self.assertFalse(hasattr(customer, 'plan'))
 
     def test_update_and_cancel_subscription(self):
-        customer = openpay.Customer.create(name="Miguel", last_name="Lopez", email="mlopez@example.com")
+        customer = openpay.Customer.create(
+            name="Miguel", last_name="Lopez", email="mlopez@example.com")
 
-        sub = customer.subscriptions.create(plan_id=self.plan_obj.id, card=DUMMY_CARD)
+        sub = customer.subscriptions.create(
+            plan_id=self.plan_obj.id, card=DUMMY_CARD)
 
         sub.cancel_at_period_end = True
         sub.save()
@@ -282,7 +298,8 @@ class CustomerPlanTest(OpenpayTestCase):
         customer = openpay.Customer.create(
             name="Miguel", last_name="Lopez", email="mlopez@example.com")
         subscription = customer.subscriptions.create(
-            plan_id=self.plan_obj.id, card=DUMMY_CARD, trial_end=trial_end.strftime('Y-m-d'))
+            plan_id=self.plan_obj.id, card=DUMMY_CARD,
+            trial_end=trial_end.strftime('Y-m-d'))
         self.assertTrue(subscription.id)
 
     def test_integer_trial_end(self):
@@ -291,7 +308,9 @@ class CustomerPlanTest(OpenpayTestCase):
         customer = openpay.Customer.create(name="Miguel",
                                            last_name="Lopez",
                                            email="mlopez@example.com")
-        subscription = customer.subscriptions.create(plan_id=self.plan_obj.id, card=DUMMY_CARD, trial_end=trial_end_int)
+        subscription = customer.subscriptions.create(
+            plan_id=self.plan_obj.id, card=DUMMY_CARD,
+            trial_end=trial_end_int)
         self.assertTrue(subscription.id)
 
 
@@ -363,11 +382,14 @@ class PayoutTest(OpenpayTestCase):
 
     def setUp(self):
         super(PayoutTest, self).setUp()
-        self.customer = openpay.Customer.create(name="John", last_name="Doe", description="Test User",
-                                                email="johndoe@example.com")
-        self.bank_account = self.customer.bank_accounts.create(clabe="032180000118359719",
-                                                               alias="Cuenta principal",
-                                                               holder_name="John Doe")
+        self.customer = openpay.Customer.create(
+            name="John", last_name="Doe", description="Test User",
+            email="johndoe@example.com")
+        self.bank_account = self.customer.bank_accounts.create(
+            clabe="032180000118359719",
+            alias="Cuenta principal",
+            holder_name="John Doe")
+
         self.card = self.customer.cards.create(
             card_number="4111111111111111",
             holder_name="Juan Perez",
@@ -390,11 +412,13 @@ class PayoutTest(OpenpayTestCase):
                                      order_id=generate_order_id())
 
     def test_create_payout_with_bank_account(self):
-        payout = self.customer.payouts.create(method='bank_account',
-                                              destination_id=self.bank_account.id,
-                                              amount="10",
-                                              description="First payout",
-                                              order_id=generate_order_id())
+        payout = self.customer.payouts.create(
+            method='bank_account',
+            destination_id=self.bank_account.id,
+            amount="10",
+            description="First payout",
+            order_id=generate_order_id())
+
         self.assertTrue(hasattr(payout, 'id'))
         self.assertTrue(isinstance(payout, openpay.Payout))
 
@@ -417,8 +441,9 @@ class CardTest(OpenpayTestCase):
 
     def setUp(self):
         super(CardTest, self).setUp()
-        self.customer = openpay.Customer.create(name="John", last_name="Doe", description="Test User",
-                                                email="johndoe@example.com")
+        self.customer = openpay.Customer.create(
+            name="John", last_name="Doe", description="Test User",
+            email="johndoe@example.com")
         self.card = self.customer.cards.create(
             card_number="4111111111111111",
             holder_name="Juan Perez",
@@ -460,11 +485,14 @@ class FeeTest(OpenpayTestCase):
 
     def setUp(self):
         super(FeeTest, self).setUp()
-        self.customer = openpay.Customer.create(name="John", last_name="Doe", description="Test User",
-                                                email="johndoe@example.com")
-        self.bank_account = self.customer.bank_accounts.create(clabe="032180000118359719",
-                                                               alias="Cuenta principal",
-                                                               holder_name="John Doe")
+        self.customer = openpay.Customer.create(
+            name="John", last_name="Doe", description="Test User",
+            email="johndoe@example.com")
+        self.bank_account = self.customer.bank_accounts.create(
+            clabe="032180000118359719",
+            alias="Cuenta principal",
+            holder_name="John Doe")
+
         self.card = self.customer.cards.create(
             card_number="4111111111111111",
             holder_name="Juan Perez",
@@ -482,13 +510,15 @@ class FeeTest(OpenpayTestCase):
             }
         )
 
-        self.charge = self.customer.charges.create(source_id=self.card.id, method="card",
-                                                   amount=10, description="Test Charge",
-                                                   order_id=generate_order_id())
+        self.charge = self.customer.charges.create(
+            source_id=self.card.id, method="card",
+            amount=10, description="Test Charge",
+            order_id=generate_order_id())
 
     def test_fee_create(self):
-        fee = openpay.Fee.create(customer_id=self.customer.id, amount=5,
-                                 description="Test Fee", order_id=generate_order_id())
+        fee = openpay.Fee.create(
+            customer_id=self.customer.id, amount=5,
+            description="Test Fee", order_id=generate_order_id())
         self.assertTrue(isinstance(fee, openpay.Fee))
         self.assertTrue(hasattr(fee, 'id'))
 
@@ -503,11 +533,14 @@ class TransferTest(OpenpayTestCase):
 
     def setUp(self):
         super(TransferTest, self).setUp()
-        self.customer = openpay.Customer.create(name="John", last_name="Doe", description="Test User",
-                                                email="johndoe@example.com")
-        self.bank_account = self.customer.bank_accounts.create(clabe="032180000118359719",
-                                                               alias="Cuenta principal",
-                                                               holder_name="John Doe")
+        self.customer = openpay.Customer.create(
+            name="John", last_name="Doe", description="Test User",
+            email="johndoe@example.com")
+        self.bank_account = self.customer.bank_accounts.create(
+            clabe="032180000118359719",
+            alias="Cuenta principal",
+            holder_name="John Doe")
+
         self.card = self.customer.cards.create(
             card_number="4111111111111111",
             holder_name="Juan Perez",
@@ -525,15 +558,18 @@ class TransferTest(OpenpayTestCase):
             }
         )
 
-        self.charge = self.customer.charges.create(source_id=self.card.id, method="card",
-                                                   amount=100, description="Test Charge",
-                                                   order_id=generate_order_id())
+        self.charge = self.customer.charges.create(
+            source_id=self.card.id, method="card",
+            amount=100, description="Test Charge",
+            order_id=generate_order_id())
 
         self.second_customer = openpay.Customer.all().data[3]
 
     def test_transfer_create(self):
-        transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=10,
-                                             description="Test transfer", order_id=generate_order_id())
+        transfer = self.customer.transfers.create(
+            customer_id=self.second_customer.id, amount=10,
+            description="Test transfer", order_id=generate_order_id())
+
         self.assertTrue(isinstance(transfer, openpay.Transfer))
         self.assertTrue(hasattr(transfer, 'id'))
 
@@ -544,13 +580,19 @@ class TransferTest(OpenpayTestCase):
         self.assertEqual(transfer_list.count, len(transfer_list.data))
 
     def test_transfer_retrieve(self):
-        transfer = self.customer.transfers.create(customer_id=self.second_customer.id, amount=10,
-                                             description="Test transfer", order_id=generate_order_id())
+        transfer = self.customer.transfers.create(
+            customer_id=self.second_customer.id, amount=10,
+            description="Test transfer", order_id=generate_order_id())
         transfer_list = self.customer.transfers.all()
         test_transfer = transfer_list.data[0]
         transfer = self.customer.transfers.retrieve(test_transfer.id)
         self.assertTrue(isinstance(transfer, openpay.Transfer))
 
+    def test_list_transfers(self):
+        customer = openpay.Customer.retrieve("amce5ycvwycfzyarjf8l")
+        transfers = customer.transfers.all()
+        self.assertTrue(isinstance(transfers.data, list))
+        self.assertTrue(isinstance(transfers.data[0], openpay.Transfer))
 
 if __name__ == '__main__':
     unittest.main()

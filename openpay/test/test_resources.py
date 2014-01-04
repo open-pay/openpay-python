@@ -1,6 +1,6 @@
-import json
+
 import openpay
-from openpay import util
+#from openpay import util
 
 from openpay.test.helper import (
     OpenpayUnitTestCase, OpenpayApiTestCase,
@@ -251,7 +251,8 @@ class ListableAPIResourceTests(OpenpayApiTestCase):
             'get', url, {})
 
         self.assertEqual(2, len(res.data))
-        self.assertTrue(all(isinstance(obj, openpay.Charge) for obj in res.data))
+        self.assertTrue(all(
+            isinstance(obj, openpay.Charge) for obj in res.data))
         self.assertEqual('jose', res.data[0].name)
         self.assertEqual('curly', res.data[1].name)
 

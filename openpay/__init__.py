@@ -1,8 +1,3 @@
-"""
-Openpay python bindings
-
-API docs http://www.openpay.mx/api-v1/
-"""
 
 api_key = None
 merchant_id = None
@@ -26,13 +21,13 @@ from openpay.error import (  # noqa
     InvalidRequestError)
 
 
-from openpay.resource import (
-    convert_to_openpay_object, BaseObject, APIResource)
-from openpay.util import logger
+#from openpay.resource import (
+#    convert_to_openpay_object, BaseObject, APIResource)
+#from openpay.util import logger
 
 import sys as _sys
-import warnings as _warnings
-from inspect import isclass as _isclass, ismodule as _ismodule
+#import warnings as _warnings
+#from inspect import isclass as _isclass, ismodule as _ismodule
 
 _dogetattr = object.__getattribute__
 _ALLOWED_ATTRIBUTES = (
