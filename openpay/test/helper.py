@@ -5,7 +5,7 @@ import os
 import random
 import re
 import string
-import sys
+# import sys
 import unittest
 
 from mock import patch, Mock
