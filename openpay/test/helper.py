@@ -110,10 +110,10 @@ class OpenpayTestCase(unittest.TestCase):
 class OpenpayUnitTestCase(OpenpayTestCase):
     REQUEST_LIBRARIES = ['urlfetch', 'requests', 'pycurl']
 
-    if sys.version_info >= (3, 0):
-        REQUEST_LIBRARIES.append('urllib.request')
-    else:
-        REQUEST_LIBRARIES.append('urllib2')
+    # if sys.version_info >= (3, 0):
+    #     REQUEST_LIBRARIES.append('urllib.request')
+    # else:
+    #     REQUEST_LIBRARIES.append('urllib2')
 
     def setUp(self):
         super(OpenpayUnitTestCase, self).setUp()
