@@ -122,11 +122,9 @@ class ListObjectTests(OpenpayApiTestCase):
 
         self.mock_response([{
             'foo': 'bar',
-            'object': 'charge'
         }])
 
     def assertResponse(self, res):
-        print(type(res.data[0]))
         self.assertTrue(isinstance(res.data[0], openpay.Charge))
         self.assertEqual('bar', res.data[0].foo)
 
