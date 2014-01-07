@@ -15,8 +15,12 @@ import openpay
 
 def generate_order_id():
 
-    return 'oid-test-{0}-{1}'.format(
+    order_id 'oid-test-{0}-{1}'.format(
         random.randint(1, 3000), str(time.time())[7:])
+    if len(order_id) > 20:
+      order_id = order_id[:20]
+
+    return order_id
 
 NOW = datetime.datetime.now()
 
