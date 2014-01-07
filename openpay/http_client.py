@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from future.builtins import str
+from future.builtins import bytes
 
 import os
 import sys
@@ -152,7 +153,7 @@ class Urllib2Client(HTTPClient):
 
         req = Request(url, post_data, headers)
         base64string = encodebytes(
-            '%s:%s' % (user, '')).replace('\n', '')
+            b'%s:%s' % (user, '')).replace('\n', '')
         req.add_header("Authorization", "Basic %s" % base64string)
 
         if method not in ('get', 'post'):
