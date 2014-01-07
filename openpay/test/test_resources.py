@@ -165,7 +165,7 @@ class APIResourceTests(OpenpayApiTestCase):
 
         res = MyResource.retrieve('foo*', myparam=5)
 
-        url = '/v1/{0}/myresources/foo*'.format(openpay.merchant_id)
+        url = '/v1/{0}/myresources/foo%2A'.format(openpay.merchant_id)
         self.requestor_mock.request.assert_called_with(
             'get', url, {'myparam': 5}
         )
