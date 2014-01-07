@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from future.builtins import super
+from future.builtins import range
+from future.builtins import str
+
 import time
 import datetime
 import os
@@ -97,11 +102,11 @@ class OpenpayTestCase(unittest.TestCase):
     def assertRaisesRegexp(self, exception, regexp, callable, *args, **kwargs):
         try:
             callable(*args, **kwargs)
-        except exception, err:
+        except exception as err:
             if regexp is None:
                 return True
 
-            if isinstance(regexp, basestring):
+            if isinstance(regexp, str):
                 regexp = re.compile(regexp)
             if not regexp.search(str(err)):
                 raise self.failureException('"%s" does not match "%s"' %
@@ -133,7 +138,7 @@ class OpenpayUnitTestCase(OpenpayTestCase):
     def tearDown(self):
         super(OpenpayUnitTestCase, self).tearDown()
 
-        for patcher in self.request_patchers.itervalues():
+        for patcher in list(self.request_patchers.values()):
             patcher.stop()
 
 
