@@ -153,9 +153,15 @@ class Urllib2Client(HTTPClient):
             req.get_method = lambda: method.upper()
 
         try:
-            response = urlopen(req)
-            rbody = response.read()
-            rcode = response.code
+            if sys.version_info >= (3, 0):
+                with urlopen(req) as response:
+                    rbody = response.read()
+                    rcode = response.code
+            else:
+                import contextlib
+                with contextlib.closing(urlopen(req)) as response:
+                    rbody = response.read()
+                    rcode = response.code
         except HTTPError as e:
             rcode = e.code
             rbody = e.read()
