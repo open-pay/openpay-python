@@ -5,7 +5,6 @@ import os
 import sys
 import textwrap
 import warnings
-import base64
 
 from openpay import error
 
@@ -18,6 +17,13 @@ try:
 except ImportError:
     from urllib.request import Request, urlopen
     from urllib.error import HTTPError, URLError
+
+try:
+    # base64.encodestring is deprecated in Python 3.x
+    from base64 import encodebytes
+except ImportError:
+    # Python 2.x
+    from base64 import encodestring as encodebytes
 
 try:
     import pycurl
@@ -145,7 +151,7 @@ class Urllib2Client(HTTPClient):
             post_data = post_data.encode('utf-8')
 
         req = Request(url, post_data, headers)
-        base64string = base64.encodestring(
+        base64string = encodebytes(
             '%s:%s' % (user, '')).replace('\n', '')
         req.add_header("Authorization", "Basic %s" % base64string)
 
