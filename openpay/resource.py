@@ -5,6 +5,11 @@ try:
 except ImportError:
     import simplejson as json
 
+try:
+    from urllib import quote_plus
+except ImportError:
+    from urllib.parse import quote_plus
+
 from future.builtins import super
 from future.builtins import hex
 from future.builtins import str
@@ -217,7 +222,7 @@ class APIResource(BaseObject):
             params = {'customer': self._retrieve_params.get('customer')}
 
         base = self.class_url(params)
-        extn = id
+        extn = quote_plus(id)
         return "%s/%s" % (base, extn)
 
 
@@ -232,7 +237,7 @@ class ListObject(BaseObject):
     def retrieve(self, id, **params):
         base = self.get('url')
         id = utf8(id)
-        extn = id
+        extn = quote_plus(id)
         url = "%s/%s" % (base, extn)
 
         return self.request('get', url, params)
@@ -368,7 +373,7 @@ class Card(ListableAPIResource, UpdateableAPIResource,
 
         base = Customer.class_url()
         cust_extn = self.customer
-        extn = self.id
+        extn = quote_plus(self.id)
 
         return "%s/%s/cards/%s" % (base, cust_extn, extn)
 
@@ -400,13 +405,13 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 
         if hasattr(self, '_as_merchant'):
             base = Charge.class_url()
-            extn = self.id
+            extn = quote_plus(self.id)
             url = "{0}/{1}".format(base, extn)
         else:
             self.customer = utf8(self.customer_id)
             base = Customer.class_url()
             cust_extn = self.customer
-            extn = self.id
+            extn = quote_plus(self.id)
             url = "%s/%s/charges/%s" % (base, cust_extn, extn)
 
         return url
@@ -472,7 +477,9 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         cls._as_merchant = True
         requestor = api.APIClient(api_key)
         url = cls.class_url()
-        url = "{0}/{1}".format(url, id)
+        id = utf8(id)
+        extn = quote_plus(id)
+        url = "%s/%s" % (url, extn)
         response, api_key = requestor.request('get', url, params)
         return convert_to_openpay_object(response, api_key, 'charge')
 
@@ -651,6 +658,6 @@ class Subscription(DeletableAPIResource, UpdateableAPIResource):
 
         base = Customer.class_url()
         cust_extn = self.customer
-        extn = self.id
+        extn = quote_plus(self.id)
 
         return "%s/%s/subscriptions/%s" % (base, cust_extn, extn)

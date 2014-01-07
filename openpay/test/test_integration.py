@@ -90,7 +90,7 @@ class FunctionalTests(OpenpayTestCase):
         # Make sure unicode requests can be sent
         self.assertRaises(openpay.error.InvalidRequestError,
                           openpay.Charge.retrieve_as_merchant,
-                          id="{0}".format('☃'))
+                          id=u'☃')
 
     # def test_none_values(self):
     #     customer = openpay.Customer.create(name=None, last_name=None)
