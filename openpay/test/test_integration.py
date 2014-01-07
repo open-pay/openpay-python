@@ -45,7 +45,7 @@ class FunctionalTests(OpenpayTestCase):
         self.patched_api_base = patch(
             'openpay.get_api_base',
             lambda: 'https://my-invalid-domain.ireallywontresolve/v1')
-       #get_api_base_mock = self.patched_api_base.start()
+       # get_api_base_mock = self.patched_api_base.start()
         self.patched_api_base.start()
         try:
             self.assertRaises(openpay.error.APIConnectionError,
