@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from future.builtins import str
 
 api_key = None
 merchant_id = None
@@ -42,8 +44,8 @@ _original_module = _sys.modules[__name__]
 
 def get_api_base():
     if not production:
-        api_base = "https://sandbox-api.openpay.mx"
+        api_base = str("https://sandbox-api.openpay.mx")
     else:
-        api_base = "https://api.openpay.mx"
+        api_base = str("https://api.openpay.mx")
 
     return api_base
