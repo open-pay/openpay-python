@@ -1,7 +1,11 @@
+from __future__ import unicode_literals
+from future.builtins import str
+
 import os
 import sys
 import textwrap
 import warnings
+import base64
 
 from openpay import error
 
@@ -10,10 +14,10 @@ from openpay import error
 # - Use Pycurl if it's there (at least it verifies SSL certs)
 # - Fall back to urllib2 with a warning if needed
 try:
-    import urllib2
-    import base64
+    from urllib2 import Request, urlopen, HTTPError, URLError
 except ImportError:
-    pass
+    from urllib.request import Request, urlopen
+    from urllib.error import HTTPError, URLError
 
 try:
     import pycurl
@@ -81,7 +85,7 @@ class RequestsClient(HTTPClient):
                                           timeout=80,
                                           auth=(user, ''),
                                           ** kwargs)
-            except TypeError, e:
+            except TypeError as e:
                 raise TypeError(
                     'Warning: It looks like your installed version of the '
                     '"requests" library is not compatible with Openpay\'s '
@@ -137,10 +141,10 @@ class Urllib2Client(HTTPClient):
         name = 'urllib2'
 
     def request(self, method, url, headers, post_data=None, user=None):
-        if sys.version_info >= (3, 0) and isinstance(post_data, basestring):
+        if sys.version_info >= (3, 0) and isinstance(post_data, str):
             post_data = post_data.encode('utf-8')
 
-        req = urllib2.Request(url, post_data, headers)
+        req = Request(url, post_data, headers)
         base64string = base64.encodestring(
             '%s:%s' % (user, '')).replace('\n', '')
         req.add_header("Authorization", "Basic %s" % base64string)
@@ -149,13 +153,13 @@ class Urllib2Client(HTTPClient):
             req.get_method = lambda: method.upper()
 
         try:
-            response = urllib2.urlopen(req)
+            response = urlopen(req)
             rbody = response.read()
             rcode = response.code
-        except urllib2.HTTPError, e:
+        except HTTPError as e:
             rcode = e.code
             rbody = e.read()
-        except (urllib2.URLError, ValueError), e:
+        except (URLError, ValueError) as e:
             self._handle_request_error(e)
         return rbody, rcode
 
