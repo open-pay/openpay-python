@@ -152,8 +152,9 @@ class Urllib2Client(HTTPClient):
             post_data = post_data.encode('utf-8')
 
         req = Request(url, post_data, headers)
-        user_string = '%s:%s' % (user, '').replace('\n', '')
-        base64string = encodebytes(bytes(user_string))
+        user_string = '%s:%s' % (user, '')
+        user_string = user_string.replace('\n', '')
+        base64string = encodebytes(bytes(user_string, encoding='utf-8'))
         req.add_header("Authorization", "Basic %s" % base64string)
 
         if method not in ('get', 'post'):
