@@ -29,6 +29,9 @@ def convert_to_openpay_object(resp, api_key, item_type=None):
     elif isinstance(resp, dict) and not isinstance(resp, BaseObject):
         resp = resp.copy()
         klass_name = resp.get('object')
+        if klass_name:
+            klass_name = str(klass_name)
+
         if not klass_name and item_type:
             klass_name = str(item_type)
         if isinstance(klass_name, str):
@@ -157,8 +160,7 @@ class BaseObject(dict):
             if 'object' not in list(response.keys()):
                 response.update({'object': self.get('item_type')})
 
-        return convert_to_openpay_object(
-            response, api_key, self.get('item_type'))
+        return convert_to_openpay_object(response, api_key)
 
     def __repr__(self):
         ident_parts = [type(self).__name__]
