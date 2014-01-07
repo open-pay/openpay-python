@@ -14,10 +14,11 @@ from openpay import error
 # - Use Pycurl if it's there (at least it verifies SSL certs)
 # - Fall back to urllib2 with a warning if needed
 try:
-    from urllib2 import Request, urlopen, HTTPError, URLError
+    import urllib2
+    import contextlib
 except ImportError:
-    from urllib.request import Request, urlopen
-    from urllib.error import HTTPError, URLError
+    import urllib.request
+    import urllib.error
 
 try:
     # base64.encodestring is deprecated in Python 3.x
@@ -151,31 +152,47 @@ class Urllib2Client(HTTPClient):
         if sys.version_info >= (3, 0) and isinstance(post_data, str):
             post_data = post_data.encode('utf-8')
 
-        req = Request(url, post_data, headers)
-        user_string = '%s:%s' % (user, '')
-        user_string = user_string.replace('\n', '')
-        base64string = encodebytes(bytes(user_string, encoding='utf-8'))
-        req.add_header("Authorization", "Basic %s" % base64string)
+        if sys.version_info >= (3, 0):
+            req = urllib.request.Request(url, post_data, headers)
+            user_string = '%s:%s' % (user, '')
+            user_string = user_string.replace('\n', '')
+            base64string = encodebytes(bytes(user_string, encoding='utf-8'))
+            req.add_header("Authorization", "Basic %s" % base64string)
 
-        if method not in ('get', 'post'):
-            req.get_method = lambda: method.upper()
+            if method not in ('get', 'post'):
+                req.get_method = lambda: method.upper()
 
-        try:
-            if sys.version_info >= (3, 0):
-                with urlopen(req) as response:
+            try:
+                with urllib.request.urlopen(req) as response:
                     rbody = response.read()
                     rcode = response.code
-            else:
-                import contextlib
-                with contextlib.closing(urlopen(req)) as response:
+            except urllib.error.HTTPError as e:
+                rcode = e.code
+                rbody = e.read()
+            except (urllib.error.URLError, ValueError) as e:
+                self._handle_request_error(e)
+            return rbody, rcode
+        else:
+            req = urllib2.Request(url, post_data, headers)
+            user_string = '%s:%s' % (user, '')
+            user_string = user_string.replace('\n', '')
+            base64string = encodebytes(user_string)
+            req.add_header("Authorization", "Basic %s" % base64string)
+
+            if method not in ('get', 'post'):
+                req.get_method = lambda: method.upper()
+
+            try:
+                with contextlib.closing(urllib2.urlopen(req)) as response:
                     rbody = response.read()
                     rcode = response.code
-        except HTTPError as e:
-            rcode = e.code
-            rbody = e.read()
-        except (URLError, ValueError) as e:
-            self._handle_request_error(e)
-        return rbody, rcode
+            except urllib2.HTTPError as e:
+                rcode = e.code
+                rbody = e.read()
+            except (urllib2.URLError, ValueError) as e:
+                self._handle_request_error(e)
+            return rbody, rcode
+
 
     def _handle_request_error(self, e):
         msg = ("Unexpected error communicating with Openpay. "
