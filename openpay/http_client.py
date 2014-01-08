@@ -15,7 +15,7 @@ from openpay import error
 # - Fall back to urllib2 with a warning if needed
 try:
     import urllib2
-    import contextlib
+    # import contextlib
 except ImportError:
     import urllib.request
     import urllib.error
@@ -192,7 +192,6 @@ class Urllib2Client(HTTPClient):
             except (urllib2.URLError, ValueError) as e:
                 self._handle_request_error(e)
             return rbody, rcode
-
 
     def _handle_request_error(self, e):
         msg = ("Unexpected error communicating with Openpay. "
