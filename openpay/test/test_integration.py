@@ -410,7 +410,7 @@ class PayoutTest(OpenpayTestCase):
                 "line1": "Av 5 de Febrero",
                 "line2": "Roble 207",
                 "line3": "col carrillo",
-                "state": "Queretaro"
+                "state": "Querétaro"
             }
         )
 

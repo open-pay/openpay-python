@@ -155,8 +155,8 @@ class Urllib2Client(HTTPClient):
         if sys.version_info >= (3, 0):
             req = urllib.request.Request(url, post_data, headers)
             user_string = '%s:%s' % (user, '')
-            user_string = user_string.replace('\n', '')
             base64string = encodebytes(bytes(user_string, encoding='utf-8'))
+            base64string.replace('\n', '')
             req.add_header("Authorization", "Basic %s" % base64string)
 
             if method not in ('get', 'post'):
@@ -174,18 +174,18 @@ class Urllib2Client(HTTPClient):
             return rbody, rcode
         else:
             req = urllib2.Request(url, post_data, headers)
-            user_string = '%s:%s' % (user, '')
-            user_string = user_string.replace('\n', '')
-            base64string = encodebytes(user_string)
-            req.add_header("Authorization", "Basic %s" % base64string)
+            base64string = encodebytes('%s:%s' % (user, ''))
+            auth_string = "Basic %s" % base64string
+            auth_string = auth_string.replace('\n', '')
+            req.add_header("Authorization", auth_string)
 
             if method not in ('get', 'post'):
                 req.get_method = lambda: method.upper()
 
             try:
-                with contextlib.closing(urllib2.urlopen(req)) as response:
-                    rbody = response.read()
-                    rcode = response.code
+                response = urllib2.urlopen(req)
+                rbody = response.read()
+                rcode = response.code
             except urllib2.HTTPError as e:
                 rcode = e.code
                 rbody = e.read()
