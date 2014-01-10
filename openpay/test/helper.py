@@ -53,6 +53,13 @@ DUMMY_CHARGE = {
     'description': 'Dummy Charge',
 }
 
+DUMMY_CHARGE_STORE = {
+    'amount': 100,
+    'order_id': generate_order_id(),
+    'method': 'store',
+    'description': 'Dummy Charge on Store',
+}
+
 DUMMY_PLAN = {
     'amount': 2000,
     'status_after_retry': 'cancelled',
@@ -87,10 +94,18 @@ class OpenpayTestCase(unittest.TestCase):
         api_base = os.environ.get('OPENPAY_API_BASE')
         if api_base:
             openpay.api_base = api_base
+        #Sandbox
         openpay.api_key = os.environ.get(
             'OPENPAY_API_KEY', 'sk_10d37cc4da8e4ffd902cdf62e37abd1b')
-        openpay.verify_ssl_certs = False
         openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
+        
+        #Dev
+        #openpay.api_key = os.environ.get(
+        #    'OPENPAY_API_KEY', '68df281c16184d47bb773d70abd4191b')
+        #openpay.merchant_id = "m4se8bd4fef1mkzk6d1b"
+        
+        openpay.verify_ssl_certs = False
+        
 
     def tearDown(self):
         super(OpenpayTestCase, self).tearDown()

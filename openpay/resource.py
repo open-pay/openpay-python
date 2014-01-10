@@ -487,21 +487,6 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 
     @classmethod
     def create_as_merchant(cls, **params):
-        """
-        Create a new charge as merchant:
-
-        Required params:
-
-        `source_id`: card id from registered cards
-
-        `method`: possible values ['card', 'bank_account']
-
-        `amount`: The charge amount
-
-        `description`: Charge description
-
-        `order_id`: Unique between all transactions
-        """
         if hasattr(cls, 'api_key'):
             api_key = cls.api_key
         else:

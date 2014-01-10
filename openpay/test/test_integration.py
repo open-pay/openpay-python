@@ -18,7 +18,7 @@ import openpay
 
 from openpay.test.helper import (
     OpenpayTestCase,
-    NOW, DUMMY_CARD, DUMMY_CHARGE, DUMMY_PLAN, generate_order_id)
+    NOW, DUMMY_CARD, DUMMY_CHARGE, DUMMY_PLAN, DUMMY_CHARGE_STORE, generate_order_id)
 
 
 class FunctionalTests(OpenpayTestCase):
@@ -205,6 +205,30 @@ class ChargeTest(OpenpayTestCase):
         self.assertEqual(
             openpay.Charge.retrieve_as_merchant(charge.id).status,
             'completed')
+
+    def test_charge_store_as_customer(self):
+        customer = openpay.Customer.create(
+            name="Miguel Lopez", email="mlopez@example.com")
+        charge = customer.charges.create(**DUMMY_CHARGE_STORE)
+        self.assertTrue(hasattr(charge, 'payment_method'))
+        self.assertTrue(hasattr(charge.payment_method, 'reference'))
+        self.assertTrue(hasattr(charge.payment_method, 'barcode_url'))
+        self.assertEqual(
+            customer.charges.retrieve(charge.id).status,
+            'in_progress')
+
+
+    def test_charge_store_as_merchant(self):
+        charge = openpay.Charge.create(**DUMMY_CHARGE_STORE)
+
+        self.assertTrue(hasattr(charge, 'payment_method'))
+        self.assertTrue(hasattr(charge.payment_method, 'reference'))
+        self.assertTrue(hasattr(charge.payment_method, 'barcode_url'))
+        self.assertEqual(charge.payment_method.type, "store")
+        self.assertTrue(isinstance(charge, openpay.Charge))
+        self.assertEqual(
+            openpay.Charge.retrieve_as_merchant(charge.id).status,
+            'in_progress')
 
 
 class CustomerTest(OpenpayTestCase):
