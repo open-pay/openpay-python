@@ -55,7 +55,6 @@ DUMMY_CHARGE = {
 
 DUMMY_CHARGE_STORE = {
     'amount': 100,
-    'order_id': generate_order_id(),
     'method': 'store',
     'description': 'Dummy Charge on Store',
 }
