@@ -45,6 +45,7 @@ DUMMY_CARD = {
         "country_code": "MX"
     }
 }
+
 DUMMY_CHARGE = {
     'amount': 100,
     'card': DUMMY_CARD,
@@ -97,14 +98,11 @@ class OpenpayTestCase(unittest.TestCase):
         openpay.api_key = os.environ.get(
             'OPENPAY_API_KEY', 'sk_10d37cc4da8e4ffd902cdf62e37abd1b')
         openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
-        
         #Dev
         #openpay.api_key = os.environ.get(
         #    'OPENPAY_API_KEY', '68df281c16184d47bb773d70abd4191b')
         #openpay.merchant_id = "m4se8bd4fef1mkzk6d1b"
-        
         openpay.verify_ssl_certs = False
-        
 
     def tearDown(self):
         super(OpenpayTestCase, self).tearDown()

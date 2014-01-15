@@ -18,7 +18,8 @@ import openpay
 
 from openpay.test.helper import (
     OpenpayTestCase,
-    NOW, DUMMY_CARD, DUMMY_CHARGE, DUMMY_PLAN, DUMMY_CHARGE_STORE, generate_order_id)
+    NOW, DUMMY_CARD, DUMMY_CHARGE, DUMMY_PLAN,
+    DUMMY_CHARGE_STORE, generate_order_id)
 
 
 class FunctionalTests(OpenpayTestCase):
@@ -216,7 +217,6 @@ class ChargeTest(OpenpayTestCase):
         self.assertEqual(
             customer.charges.retrieve(charge.id).status,
             'in_progress')
-
 
     def test_charge_store_as_merchant(self):
         charge = openpay.Charge.create(**DUMMY_CHARGE_STORE)
