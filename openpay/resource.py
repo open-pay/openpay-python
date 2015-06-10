@@ -269,6 +269,7 @@ class ListableAPIResource(APIResource):
     def all(cls, api_key=None, **params):
         requestor = api.APIClient(api_key)
         url = cls.class_url(params)
+        
         response, api_key = requestor.request('get', url, params)
         klass_name = cls.__name__.lower()
         for item in response:
@@ -292,6 +293,10 @@ class CreateableAPIResource(APIResource):
     def create(cls, api_key=None, **params):
         requestor = api.APIClient(api_key)
         url = cls.class_url(params)
+        
+        if "clean_params" in dir(cls):
+            params = cls.clean_params(params)
+        
         response, api_key = requestor.request('post', url, params)
         klass_name = cls.__name__.lower()
         return convert_to_openpay_object(response, api_key, klass_name)
@@ -392,6 +397,13 @@ class Card(ListableAPIResource, UpdateableAPIResource,
 class Charge(CreateableAPIResource, ListableAPIResource,
              UpdateableAPIResource):
 
+    @classmethod
+    def clean_params(cls, params=None):
+        if params:
+            del params['customer']
+        
+        return params
+    
     @classmethod
     def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
@@ -494,6 +506,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 
         requestor = api.APIClient(api_key)
         url = cls.class_url()
+        # charge over merchant
         response, api_key = requestor.request('post', url, params)
         return convert_to_openpay_object(response, api_key, 'charge')
 

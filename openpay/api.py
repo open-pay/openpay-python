@@ -2,7 +2,7 @@ import datetime
 import calendar
 import time
 #import warnings
-#import urllib
+import urllib
 import urlparse
 import platform
 import json
@@ -42,12 +42,17 @@ def _api_encode(data):
 
 
 def _build_api_url(url, query):
-    scheme, netloc, path, base_query, fragment = urlparse.urlsplit(url)
-
-    if base_query:
-        query = '%s&%s' % (base_query, query)
-
-    return urlparse.urlunsplit((scheme, netloc, path, query, fragment))
+    if (len(query) > 0):
+        path = url + "?"
+        for key in query:
+            path = path + key + "=" + urllib.quote(str(query[key])) + "&"
+        
+        if (path.endswith("&")):
+            path = path[:-1]
+        return path
+    else:
+        return url
+    
 
 
 class APIClient(object):
@@ -95,10 +100,6 @@ class APIClient(object):
         """
         from openpay import api_version
 
-        # Removing no needed params
-        if 'customer' in params.keys():
-            del params['customer']
-
         if self.api_key:
             my_api_key = self.api_key
         else:
@@ -115,14 +116,12 @@ class APIClient(object):
 
         abs_url = "{0}{1}".format(openpay.get_api_base(), url)
 
-        encoded_params = json.dumps(params)
-
         if method == 'get' or method == 'delete':
             if params:
-                abs_url = _build_api_url(abs_url, encoded_params)
+                abs_url = _build_api_url(abs_url, params)
             post_data = None
         elif method == 'post' or method == 'put':
-            post_data = encoded_params
+            post_data = json.dumps(params)
         else:
             raise error.APIConnectionError(
                 'Unrecognized HTTP method %r.  This may indicate a bug in the '
