@@ -10,7 +10,11 @@ Installation
 You don't need this source code unless you want to modify the package. If you just want use the Openpay
 Python bindings, you should run:
 
-    pip install openpay
+    pip install openpay 
+
+or
+
+    pip install openpay --udgrade
 
 See www.pip-installer.org/en/latest/index.html for instructions on installing pip.
 
