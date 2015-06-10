@@ -399,7 +399,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
 
     @classmethod
     def clean_params(cls, params=None):
-        if params:
+        if params and params.get('customer', None) != None:
             del params['customer']
         
         return params
