@@ -19,7 +19,7 @@ charge = openpay.Charge.create_as_merchant(
         "name":"Gerry",
         "last_name":"Robles",
         "email":"gerry@example.com",
-        "phone_number":"4423287178",
+        "phone_number":"4429938834",
         "address":{
             "city": "Queretaro",
             "state":"Queretaro",

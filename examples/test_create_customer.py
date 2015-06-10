@@ -15,7 +15,7 @@ newCustomer = openpay.Customer.create(
     last_name="Perez",
     email="nklnkfv@example.com",
     requires_account=False,
-    phone_number="4423287178",
+    phone_number="4429938834",
     address={
         "city": "Queretaro",
         "state":"Queretaro",
