@@ -45,10 +45,16 @@ def _build_api_url(url, query):
     if (len(query) > 0):
         path = url + "?"
         for key in query:
-            path = path + key + "=" + urllib.quote(str(query[key])) + "&"
+            if (isinstance(query[key], dict)):
+                for x in query[key]:
+                    path = path + key + "[" + x + "]=" + query[key][x] + "&"
+            else:
+                # path = path + key + "=" + urllib.quote(str(query[key])) + "&"
+                path = path + key + "=" + str(query[key]) + "&"
         
         if (path.endswith("&")):
             path = path[:-1]
+        
         return path
     else:
         return url
@@ -76,11 +82,8 @@ class APIClient(object):
         err = resp
 
         if rcode in [400, 404]:
-            raise error.InvalidRequestError(
-                "{0}, error code: {1}".format(err.get('description'),
-                                              resp['error_code']),
-                err.get('request_id'),
-                rbody, rcode, resp)
+            msg = err.get('description') + ", error code: " + str(resp['error_code'])
+            raise error.InvalidRequestError(msg, err.get('request_id'), rbody, rcode, resp)
         elif rcode == 401:
             raise error.AuthenticationError(
                 err.get('description'), rbody, rcode, resp)

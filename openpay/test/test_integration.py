@@ -83,7 +83,7 @@ class FunctionalTests(OpenpayTestCase):
         expiration_year = NOW.year - 2
         EXPIRED_CARD['expiration_month'] = NOW.month
         EXPIRED_CARD['expiration_year'] = str(expiration_year)[2:]
-        self.assertRaises(openpay.error.CardError, openpay.Charge.create,
+        self.assertRaises(openpay.error.InvalidRequestError, openpay.Charge.create,
                           amount=100, method='card', description="Test Order",
                           order_id="oid-00080", card=EXPIRED_CARD)
 
@@ -155,8 +155,8 @@ class CardErrorTest(OpenpayTestCase):
                                   description="Test Order",
                                   order_id="oid-00080",
                                   card=EXPIRED_CARD)
-        except openpay.error.CardError as e:
-            self.assertEqual(402, e.http_status)
+        except openpay.error.InvalidRequestError as e:
+            self.assertEqual(400, e.http_status)
             self.assertTrue(isinstance(e.http_body, str))
             self.assertTrue(isinstance(e.json_body, dict))
 
@@ -170,9 +170,9 @@ class ChargeTest(OpenpayTestCase):
 
     def test_charge_list_all(self):
         charge_list = openpay.Charge.all(
-            creation={'lte': NOW.strftime('Y-m-d')})
+            creation={'lte': NOW.strftime("%Y-%m-%d")})
         list_result = charge_list.all(
-            creation={'lte': NOW.strftime('Y-m-d')})
+            creation={'lte': NOW.strftime("%Y-%m-%d")})
 
         self.assertEqual(len(charge_list.data),
                          len(list_result.data))
@@ -360,9 +360,6 @@ class InvalidRequestErrorTest(OpenpayTestCase):
             openpay.Charge.create()
         except openpay.error.InvalidRequestError as e:
             self.assertEqual(400, e.http_status)
-            self.assertTrue(isinstance(e.http_body, str))
-            self.assertTrue(isinstance(e.json_body, dict))
-
 
 class PlanTest(OpenpayTestCase):
 
