@@ -417,7 +417,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
     def instance_url(self):
         self.id = utf8(self.id)
 
-        if hasattr(self, '_as_merchant'):
+        if hasattr(self, '_as_merchant') and self._as_merchant == True:
             base = Charge.class_url()
             extn = quote_plus(self.id)
             url = "{0}/{1}".format(base, extn)
@@ -433,10 +433,10 @@ class Charge(CreateableAPIResource, ListableAPIResource,
     def refund(self, **params):
         if 'merchant' in list(params.keys()):
             self._as_merchant = True
+            del params['merchant']
         else:
             self._as_merchant = False
 
-        del params['merchant']
         url = self.instance_url() + '/refund'
         self.refresh_from(self.request('post', url, params))
         return self
