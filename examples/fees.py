@@ -12,10 +12,17 @@ openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 fee = openpay.Fee.create(
     customer_id="amce5ycvwycfzyarjf8l",
     amount=12.50,
-    description="Fee Charge",
-    order_id="oid=1245"
+    description="Fee Charge"
 )
+
 print fee
 
-print openpay.Fee.all()
+fee = openpay.Fee.retrieve(fee.id)
 
+print fee
+
+refundFee = openpay.Fee.refund(fee.id, description="Fee refund Test")
+
+print "refund: " , refundFee
+
+print openpay.Fee.all()

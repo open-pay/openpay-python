@@ -642,9 +642,75 @@ class Payout(CreateableAPIResource, ListableAPIResource):
         response, api_key = requestor.request('get', url, params)
         return convert_to_openpay_object(response, api_key, 'payout')
 
+    @classmethod
+    def delete_as_merchant(cls, payout_id):
+        params = {}
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = api.APIClient(api_key)
+        url = cls.class_url()
+        url = "{0}/{1}".format(url, payout_id)
+        response, api_key = requestor.request('delete', url, params)
+        return convert_to_openpay_object(response, api_key, 'payout')
+
+    @classmethod
+    def create_as_customer(cls, customer_id, **params):
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = api.APIClient(api_key)
+        url = Payout.class_url({'customer': customer_id})
+        response, api_key = requestor.request('post', url, params)
+        return convert_to_openpay_object(response, api_key, 'payout')
+
+    @classmethod
+    def retrieve_as_customer(cls, customer_id, payout_id):
+        params = {}
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = api.APIClient(api_key)
+        url = Payout.class_url({'customer': customer_id})
+        url = "{0}/{1}/".format(url, payout_id)
+        response, api_key = requestor.request('get', url, params)
+        return convert_to_openpay_object(response, api_key, 'payout')
+
+    @classmethod
+    def delete_as_customer(cls, customer_id, payout_id):
+        params = {}
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = api.APIClient(api_key)
+        url = Payout.class_url({'customer': customer_id})
+        url = "{0}/{1}/".format(url, payout_id)
+        response, api_key = requestor.request('delete', url, params)
+        return convert_to_openpay_object(response, api_key, 'payout')
+
 
 class Fee(CreateableAPIResource, ListableAPIResource):
-    pass
+
+    @classmethod
+    def refund(cls, fee_id, **params):
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+
+        requestor = api.APIClient(api_key)
+        url = cls.class_url()
+        url = "{0}/{1}/refund".format(url, fee_id)
+        response, api_key = requestor.request('post', url, params)
+        return convert_to_openpay_object(response, api_key, 'fee')
 
 
 class Subscription(DeletableAPIResource, UpdateableAPIResource):

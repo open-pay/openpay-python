@@ -11,11 +11,24 @@ openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 
 customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
 
-bank_account = customer.bank_accounts.all()[0] # We get the first account
-# print customer.payouts.create(method='bank_account', destination_id=bank_account.id, amount="100", description="First payout", order_id="oid-00058")
+print "customer: ", customer
 
-print "Retrieving payout with ID: tbs6a7g4pypww4eq640d"
-print customer.payouts.retrieve("tbs6a7g4pypww4eq640d")
+bank_account = customer.bank_accounts.all().data[0] # We get the first account
+
+print "bank_account ", bank_account
+
+payout = customer.payouts.create(method='bank_account', destination_id=bank_account.id, amount="100", description="First payout")
+
+print "payout ", payout
+payoutDeleted = openpay.Payout.delete_as_customer(customer.id, payout.id)
+print "payoutDeleted: ", payoutDeleted
 
 print "Creating payout as merchant"
-print openpay.Payout.create_as_merchant(method="bank_account", destination_id="bkjj51ovzkv2tr1mn0n8", amount=200.00, description="Second payout", order_id="oid-00064")
+payout = openpay.Payout.create_as_merchant(method="bank_account", destination_id=bank_account.id, amount=200.00, description="Payout")
+print payout
+
+print "Deleting payout as merchant ---------------->"
+payoutDeleted = openpay.Payout.delete_as_merchant(payout.id)
+print payoutDeleted
+
+
