@@ -10,7 +10,7 @@ Installation
 You don't need this source code unless you want to modify the package. If you just want use the Openpay
 Python bindings, you should run:
 
-    pip install openpay 
+    pip install openpay
 
 or
 
@@ -23,7 +23,7 @@ Implementation
 
 #### Configuration ####
 
-Before use the library will be necessary to set up your Merchant ID and Private key. 
+Before use the library will be necessary to set up your Merchant ID and Private key.
 
 ```python
 import openpay
@@ -35,10 +35,34 @@ openpay.production = True  # By default this works in sandbox mode
 ```
 
 #### Usage ####
+Once configured the library, you can use it to interact with Openpay API services.
+
+
+##### Tokens #####
+
+Creating a token:
+
+```python
+openpay.Token.create(
+       card_number="4111111111111111",
+       holder_name="Juan Perez Ramirez",
+       expiration_year="20",
+       expiration_month="12",
+       cvv2="110",
+       address={
+       "city":"Querétaro",
+       "country_code":"MX",
+       "postal_code":"76900",
+       "line1":"Av 5 de Febrero",
+       "line2":"Roble 207",
+       "line3":"col carrillo",
+       "state":"Queretaro"
+       })
+```
 
 ##### Customer #####
 
-Once configured the library, you can use it to interact with Openpay API services. You can start creating a customer:
+Creating a customer:
 
 ```python
 customer = openpay.Customer.create(
@@ -58,7 +82,7 @@ customer = openpay.Customer.create(
 )
 ```
 
-Once you have a customer, you have access to few resources for current customer. According to the current version 
+Once you have a customer, you have access to few resources for current customer. According to the current version
 of the Openpay API, these resources are:
 
   - cards
@@ -68,7 +92,7 @@ of the Openpay API, these resources are:
   - bank accounts
   - subscriptions
 
-You can access all of these resources as public variables of the root instance (customer in this example), 
+You can access all of these resources as public variables of the root instance (customer in this example),
 so, if you want to add a new card you will be able to do it as follows:
 
 ```python
@@ -142,9 +166,9 @@ Create a customer transfer
 
 ```python
 transfer1 = customer.transfers.create(
-    customer_id="acuqxruyv0hi1wfdwmym", 
-    amount=100, 
-    description="Test transfer", 
+    customer_id="acuqxruyv0hi1wfdwmym",
+    amount=100,
+    description="Test transfer",
     order_id="oid-00059"
 )
 ```
@@ -161,8 +185,8 @@ Add bank account to customer
 
 ```python
 bank_account = customer.bank_accounts.create(
-    clabe="032180000118359719", 
-    alias="Cuenta principal", 
+    clabe="032180000118359719",
+    alias="Cuenta principal",
     holder_name="Juan Perez"
 )
 ```
@@ -216,9 +240,9 @@ Add payout for customer
 bank_account = customer.bank_accounts.all()[0]  # We get the first account
 customer.payouts.create(
     method='bank_account',   # possible values ['bank_accunt', 'card']
-    destination_id=bank_account.id, 
-    amount="100", 
-    description="First payout", 
+    destination_id=bank_account.id,
+    amount="100",
+    description="First payout",
     order_id="oid-00058"
 )
 ```
@@ -241,12 +265,12 @@ Create new plan
 
 ```python
 plan = openpay.Plan.create(
-    amount=150.00, 
-    status_after_retry="cancelled", 
+    amount=150.00,
+    status_after_retry="cancelled",
     retry_times=2,
-    name="Curso de Ingles", 
-    repeat_unit="month", 
-    trial_days=30, 
+    name="Curso de Ingles",
+    repeat_unit="month",
+    trial_days=30,
     repeat_every=1
 )
 ```

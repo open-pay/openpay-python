@@ -163,6 +163,29 @@ class CardErrorTest(OpenpayTestCase):
 # Note that these are in addition to the core functional charge tests
 
 
+class TokenTest(OpenpayTestCase):
+
+    def setUp(self):
+        super(TokenTest, self).setUp()
+
+    def test_token(self):
+        token = openpay.Token.create(
+            card_number="4111111111111111",
+            holder_name="Juan Perez Ramirez",
+            expiration_year="20",
+            expiration_month="12",
+            cvv2="110",
+            address={
+            "city":"Querétaro",
+            "country_code":"MX",
+            "postal_code":"76900",
+            "line1":"Av 5 de Febrero",
+            "line2":"Roble 207",
+            "line3":"col carrillo",
+            "state":"Queretaro"
+            })
+        self.assertTrue(hasattr(token, 'id'))
+
 class ChargeTest(OpenpayTestCase):
 
     def setUp(self):

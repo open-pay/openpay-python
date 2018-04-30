@@ -22,7 +22,7 @@ def convert_to_openpay_object(resp, api_key, item_type=None):
     types = {'charge': Charge, 'customer': Customer,
              'plan': Plan, 'transfer': Transfer, 'list': ListObject,
              'card': Card, 'payout': Payout, 'subscription': Subscription,
-             'bank_account': BankAccount, 'fee': Fee}
+             'bank_account': BankAccount, 'fee': Fee, 'token': Token}
 
     if isinstance(resp, list):
         return [convert_to_openpay_object(i, api_key, item_type) for i in resp]
@@ -269,7 +269,7 @@ class ListableAPIResource(APIResource):
     def all(cls, api_key=None, **params):
         requestor = api.APIClient(api_key)
         url = cls.class_url(params)
-        
+
         response, api_key = requestor.request('get', url, params)
         klass_name = cls.__name__.lower()
         for item in response:
@@ -293,7 +293,7 @@ class CreateableAPIResource(APIResource):
     def create(cls, api_key=None, **params):
         requestor = api.APIClient(api_key)
         url = cls.class_url(params)
-        
+
         if "clean_params" in dir(cls):
             params = cls.clean_params(params)
 
@@ -401,9 +401,9 @@ class Charge(CreateableAPIResource, ListableAPIResource,
     def clean_params(cls, params=None):
         if params and params.get('customer', None) != None:
             del params['customer']
-        
+
         return params
-    
+
     @classmethod
     def class_url(cls, params=None):
         merchant_id = openpay.merchant_id
@@ -601,6 +601,10 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
 class Plan(CreateableAPIResource, DeletableAPIResource,
            UpdateableAPIResource, ListableAPIResource):
+    pass
+
+
+class Token(CreateableAPIResource):
     pass
 
 

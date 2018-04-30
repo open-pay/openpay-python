@@ -12,7 +12,7 @@ verify_ssl_certs = True
 # Resource
 from openpay.resource import (  # noqa
     Card, Charge, Customer, Plan, Transfer,
-    Fee, BankAccount, Payout, Subscription)
+    Fee, BankAccount, Payout, Subscription, Token)
 
 # Error imports.  Note that we may want to move these out of the root
 # namespace in the future and you should prefer to access them via
