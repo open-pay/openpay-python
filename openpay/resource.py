@@ -22,7 +22,7 @@ def convert_to_openpay_object(resp, api_key, item_type=None):
     types = {'charge': Charge, 'customer': Customer,
              'plan': Plan, 'transfer': Transfer, 'list': ListObject,
              'card': Card, 'payout': Payout, 'subscription': Subscription,
-             'bank_account': BankAccount, 'fee': Fee, 'token': Token}
+             'bank_account': BankAccount, 'fee': Fee}
 
     if isinstance(resp, list):
         return [convert_to_openpay_object(i, api_key, item_type) for i in resp]
@@ -602,11 +602,6 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 class Plan(CreateableAPIResource, DeletableAPIResource,
            UpdateableAPIResource, ListableAPIResource):
     pass
-
-
-class Token(CreateableAPIResource):
-    pass
-
 
 class Transfer(CreateableAPIResource, UpdateableAPIResource,
                ListableAPIResource):
