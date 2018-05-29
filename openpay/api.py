@@ -1,9 +1,7 @@
 import datetime
 import calendar
 import time
-#import warnings
-import urllib
-import urlparse
+# import warnings
 import platform
 import json
 
@@ -51,14 +49,13 @@ def _build_api_url(url, query):
             else:
                 # path = path + key + "=" + urllib.quote(str(query[key])) + "&"
                 path = path + key + "=" + str(query[key]) + "&"
-        
+
         if (path.endswith("&")):
             path = path[:-1]
-        
+
         return path
     else:
         return url
-    
 
 
 class APIClient(object):
@@ -82,8 +79,10 @@ class APIClient(object):
         err = resp
 
         if rcode in [400, 404]:
-            msg = err.get('description') + ", error code: " + str(resp['error_code'])
-            raise error.InvalidRequestError(msg, err.get('request_id'), rbody, rcode, resp)
+            msg = err.get('description') + ", error code: " + str(
+                resp['error_code'])
+            raise error.InvalidRequestError(
+                msg, err.get('request_id'), rbody, rcode, resp)
         elif rcode == 401:
             raise error.AuthenticationError(
                 err.get('description'), rbody, rcode, resp)
@@ -138,8 +137,8 @@ class APIClient(object):
             'httplib': self._client.name
         }
         for attr, func in [['lang_version', platform.python_version],
-                          ['platform', platform.platform],
-                          ['uname', lambda: ' '.join(platform.uname())]]:
+                           ['platform', platform.platform],
+                           ['uname', lambda: ' '.join(platform.uname())]]:
             try:
                 val = func()
             except Exception as e:

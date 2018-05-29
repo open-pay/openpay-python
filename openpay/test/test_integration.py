@@ -413,7 +413,7 @@ class PayoutTest(OpenpayTestCase):
             name="John", last_name="Doe", description="Test User",
             email="johndoe@example.com")
         self.bank_account = self.customer.bank_accounts.create(
-            clabe="032180000118359719",
+            clabe="646180109490002822",
             alias="Cuenta principal",
             holder_name="John Doe")
 
@@ -446,15 +446,6 @@ class PayoutTest(OpenpayTestCase):
             description="First payout",
             order_id=generate_order_id())
 
-        self.assertTrue(hasattr(payout, 'id'))
-        self.assertTrue(isinstance(payout, openpay.Payout))
-
-    def test_create_payout_with_card(self):
-        payout = self.customer.payouts.create(method="card",
-                                              destination_id=self.card.id,
-                                              amount=25,
-                                              description="Payout with card",
-                                              order_id=generate_order_id())
         self.assertTrue(hasattr(payout, 'id'))
         self.assertTrue(isinstance(payout, openpay.Payout))
 
@@ -516,7 +507,7 @@ class FeeTest(OpenpayTestCase):
             name="John", last_name="Doe", description="Test User",
             email="johndoe@example.com")
         self.bank_account = self.customer.bank_accounts.create(
-            clabe="032180000118359719",
+            clabe="646180109490002822",
             alias="Cuenta principal",
             holder_name="John Doe")
 
@@ -564,7 +555,7 @@ class TransferTest(OpenpayTestCase):
             name="John", last_name="Doe", description="Test User",
             email="johndoe@example.com")
         self.bank_account = self.customer.bank_accounts.create(
-            clabe="032180000118359719",
+            clabe="646180109490002822",
             alias="Cuenta principal",
             holder_name="John Doe")
 
