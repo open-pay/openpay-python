@@ -250,21 +250,21 @@ class CustomerTest(OpenpayTestCase):
         self.assertEqual(1,
                          len(customer.charges.all().data))
 
-    def test_unset_description(self):
-        customer = openpay.Customer.create(
-            name="Miguel", last_name="Lopez",
-            email="mlopez@example.com", description="foo bar")
-
-        customer.description = None
-        customer.save()
-
-        self.assertEqual(
-            None,
-            customer.retrieve(customer.id).get('description'))
-
-    def test_cannot_set_empty_string(self):
-        customer = openpay.Customer()
-        self.assertRaises(ValueError, setattr, customer, "description", "")
+#    def test_unset_description(self):
+#        customer = openpay.Customer.create(
+#            name="Miguel", last_name="Lopez",
+#            email="mlopez@example.com", description="foo bar")
+#
+#        customer.description = None
+#        customer.save()
+#
+#        self.assertEqual(
+#            None,
+#            customer.retrieve(customer.id).get('description'))
+#
+#    def test_cannot_set_empty_string(self):
+#        customer = openpay.Customer()
+#        self.assertRaises(ValueError, setattr, customer, "description", "")
 
     # def test_update_customer_card(self):
     #     customer = openpay.Customer.all(limit=1).data[0]
