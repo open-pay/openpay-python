@@ -14,7 +14,7 @@ from openpay import error
 # - Use Pycurl if it's there (at least it verifies SSL certs)
 # - Fall back to urllib2 with a warning if needed
 try:
-    import urllib2
+    import ssl, urllib2
     # import contextlib
 except ImportError:
     import urllib.request
@@ -183,7 +183,8 @@ class Urllib2Client(HTTPClient):
                 req.get_method = lambda: method.upper()
 
             try:
-                response = urllib2.urlopen(req)
+                ctx = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+                response = urllib2.urlopen(req, context=ctx)
                 rbody = response.read()
                 rcode = response.code
             except urllib2.HTTPError as e:
