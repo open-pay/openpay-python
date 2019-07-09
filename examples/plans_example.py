@@ -20,6 +20,8 @@ openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 # print "All Plans"
 # plans = openpay.Plan.all()
 # print plans
+
+print("Getting customer")
 customer = openpay.Customer.retrieve('ancgmuvdtcvppcsfi3j4')
 # print customer.cards.create(
 # 	card_number="4111111111111111",
@@ -37,11 +39,12 @@ customer = openpay.Customer.retrieve('ancgmuvdtcvppcsfi3j4')
 # 		"state":"Queretaro"
 #    })
 print "Adding plan to user {0}".format(customer.name)
+print('Getting subscription')
 subscription = customer.subscriptions.retrieve("stxqkgt48ttknauk0xjx")
 
 subscription.trial_end_date = "2019-01-11"
 subscription.card = None
 subscription.source_id = "kmfgttah2vdiyhow5x7r"
 
+print('Updating subscription')
 subscription.save()
-
