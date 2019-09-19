@@ -14,7 +14,7 @@ Python bindings, you should run:
 
 or
 
-    pip install openpay --udgrade
+    pip install --upgrade openpay
 
 See www.pip-installer.org/en/latest/index.html for instructions on installing pip.
 
@@ -322,5 +322,5 @@ to handle this, the Python client has implemented four type of exceptions:
 
   - InvalidRequestError: This category includes requests when format is not JSON and Requests with non existents urls
   - AuthenticationError: missing Private key
-  - CardError: Transfer not accepted, Declined card, Expired card, Inssuficient funds, Stolen Card, Fraudulent card.
+  - CardError: Transfer not accepted, Declined card, Expired card, Insufficient funds, Stolen Card, Fraudulent card.
   - APIError: All other types API errors
