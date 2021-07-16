@@ -3,6 +3,7 @@ import logging
 import sys
 
 logger = logging.getLogger('stripe')
+logger.addHandler(logging.NullHandler()) # https://docs.python-guide.org/writing/logging/#logging-in-a-library
 
 __all__ = ['utf8']
 
