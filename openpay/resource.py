@@ -22,7 +22,7 @@ def convert_to_openpay_object(resp, api_key, item_type=None):
     types = {'charge': Charge, 'customer': Customer,
              'plan': Plan, 'transfer': Transfer, 'list': ListObject,
              'card': Card, 'payout': Payout, 'subscription': Subscription,
-             'bank_account': BankAccount, 'fee': Fee}
+             'bank_account': BankAccount, 'fee': Fee, 'pse': Pse}
 
     if isinstance(resp, list):
         return [convert_to_openpay_object(i, api_key, item_type) for i in resp]
@@ -569,6 +569,18 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
 
         return self._subscriptions
 
+    @property
+    def pse(self):
+        data = {
+            'object': 'list',
+            'count': 0,
+            'url':Pse.build_url(self.id),
+            'item_type': 'pse'
+        }
+        if not hasattr(self, '_pse'):
+            self._pse = convert_to_openpay_object(data, self.api_key)
+        return self._pse
+
 
 class Plan(CreateableAPIResource, DeletableAPIResource,
            UpdateableAPIResource, ListableAPIResource):
@@ -644,7 +656,8 @@ class Subscription(DeletableAPIResource, UpdateableAPIResource):
                                            self.customer, extn)
 
 
-class PSE():
+class Pse(CreateableAPIResource):
+
     @classmethod
     def create(cls, customer_id=None, **params):
         if hasattr(cls, 'api_key'):
@@ -665,5 +678,7 @@ class PSE():
         else:
             return "/v1/{0}/customers/{1}/charges".format(merchant_id, customer_id)
 
-class Token(CreateableAPIResource,ListableAPIResource):
+
+
+class Token(CreateableAPIResource, ListableAPIResource):
     pass

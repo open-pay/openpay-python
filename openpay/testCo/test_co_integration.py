@@ -267,7 +267,24 @@ class CustomerTest(OpenpayTestCase):
 
         self.assertEqual(1, len(customer.charges.all().data))
 
-#ok
+    def test_pse(self):
+        customer = openpay.Customer.create(
+            name="Miguel Lopez",
+            last_name="Mi last name",
+            email="col@example.com",
+            phone_number="5744484951",
+            description="foo bar")
+        pse = customer.pse.create(method='bank_account',
+                                  amount=100,
+                                  currency='COP',
+                                  iva='10',
+                                  description='Dummy PSE',
+                                  redirect_url='/')
+
+        self.assertEqual(pse.method, 'bank_account')
+
+
+# ok
 class CustomerPlanTest(OpenpayTestCase):
 
     def setUp(self):
@@ -333,7 +350,8 @@ class CustomerPlanTest(OpenpayTestCase):
             trial_end=trial_end_int)
         self.assertTrue(subscription.id)
 
-#ok
+
+# ok
 class PlanTest(OpenpayTestCase):
 
     def setUp(self):
@@ -422,7 +440,7 @@ class CardTest(OpenpayTestCase):
 class PSETest(OpenpayTestCase):
 
     def test_create(self):
-        pse = openpay.PSE.create(method='bank_account',
+        pse = openpay.Pse.create(method='bank_account',
                                  amount=100,
                                  currency='COP',
                                  iva='10',
@@ -440,7 +458,7 @@ class PSETest(OpenpayTestCase):
             phone_number="5744484951",
             description="foo bar")
 
-        pse = openpay.PSE.create(customer_id=customer.id, method='bank_account',
+        pse = openpay.Pse.create(customer_id=customer.id, method='bank_account',
                                  amount=100,
                                  currency='COP',
                                  iva='10',
