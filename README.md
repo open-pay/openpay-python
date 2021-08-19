@@ -318,6 +318,16 @@ fees = openpay.Fee.all()
 
 #### Usage for Colombia ####
 
+```python
+import openpay
+
+openpay.api_key = "sk_10d37cc4da8e4ffd902cdf62e37abd1b"
+openpay.verify_ssl_certs = False
+openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
+openpay.production = True  # By default this works in sandbox mode
+openpay.country = 'co'  # 'mx' is default value, to use for Colombia set country='co'
+```
+
 Once configured the library, you can use it to interact with Openpay API services for Colombia.
 
 ##### Tokens #####
