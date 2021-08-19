@@ -330,7 +330,7 @@ class UpdateableAPIResource(APIResource):
             # i.e. as object.metadata = {key: val}
             metadata_update = self.metadata
             keys_to_unset = set(self._previous_metadata.keys()) - \
-                set(self.metadata.keys())
+                            set(self.metadata.keys())
             for key in keys_to_unset:
                 metadata_update[key] = ""
 
@@ -354,6 +354,7 @@ class DeletableAPIResource(APIResource):
     def delete(self, **params):
         self.refresh_from(self.request('delete', self.instance_url(), params))
         return self
+
 
 # API objects
 
@@ -615,6 +616,7 @@ class Payout(CreateableAPIResource, ListableAPIResource,
         response, api_key = requestor.request('get', url, params)
         return convert_to_openpay_object(response, api_key, 'payout')
 
+
 class Fee(CreateableAPIResource, ListableAPIResource):
 
     @classmethod
@@ -640,3 +642,28 @@ class Subscription(DeletableAPIResource, UpdateableAPIResource):
 
         return "%s/%s/subscriptions/%s" % (Customer.class_url(),
                                            self.customer, extn)
+
+
+class PSE():
+    @classmethod
+    def create(cls, customer_id=None, **params):
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+        requestor = api.APIClient(api_key)
+        url = cls.build_url(customer_id)
+        response, api_key = requestor.request('post', url, params)
+        openpay_object = convert_to_openpay_object(response, api_key)
+        return openpay_object
+
+    @classmethod
+    def build_url(cls, customer_id=None):
+        merchant_id = openpay.merchant_id
+        if customer_id == None:
+            return "/v1/{0}/charges".format(merchant_id, customer_id)
+        else:
+            return "/v1/{0}/customers/{1}/charges".format(merchant_id, customer_id)
+
+class Token(CreateableAPIResource,ListableAPIResource):
+    pass

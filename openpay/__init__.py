@@ -1,18 +1,17 @@
 from __future__ import unicode_literals
 from future.builtins import str
-
+from openpay.util import logger
 api_key = None
 merchant_id = None
-
 production = False
-
 api_version = None
 verify_ssl_certs = True
-
+country = "mx"
 # Resource
+
 from openpay.resource import (  # noqa
     Card, Charge, Customer, Plan, Transfer,
-    Fee, BankAccount, Payout, Subscription)
+    Fee, BankAccount, Payout, Subscription, PSE, Token)
 
 # Error imports.  Note that we may want to move these out of the root
 # namespace in the future and you should prefer to access them via
@@ -43,9 +42,21 @@ _original_module = _sys.modules[__name__]
 
 
 def get_api_base():
-    if not production:
-        api_base = str("https://sandbox-api.openpay.mx")
-    else:
-        api_base = str("https://api.openpay.mx")
-
+    api_base = None
+    if country is None or (country != "mx" and country != "co"):
+        errorMessage = "Country is " + country + ", you can set country with value 'mx' or 'co', Mexico or Colombia respectively"
+        logger.error(errorMessage)
+        raise error.InvalidCountryError(errorMessage, None, None, 400, None)
+    if country == "mx":
+        logger.info("Country Mexico")
+        if not production:
+            api_base = str("https://sandbox-api.openpay.mx")
+        else:
+            api_base = str("https://api.openpay.mx")
+    if country == "co":
+        logger.info("Country Mexico")
+        if not production:
+            api_base = str("https://sandbox-api.openpay.co")
+        else:
+            api_base = str("https://api.openpay.co")
     return api_base
