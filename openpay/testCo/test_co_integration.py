@@ -247,23 +247,17 @@ class CustomerTest(OpenpayTestCase):
             email="col@example.com",
             phone_number="5744484951",
             description="foo bar")
-        card = openpay.Card.create(
-            holder_name="Miguel Lopez",
-            card_number="4111111111111111",
-            cvv2="651",
-            expiration_month="07",
-            expiration_year="25",
-            address=DUMMY_ADDRESS
-        )
+        token = openpay.Token.create(card_number='4111111111111111',
+                                     holder_name='Juan Perez Ramirez',
+                                     expiration_year='28', expiration_month='12', cvv2='110', address=DUMMY_ADDRESS)
         customer.charges.create(
-            source_id=card.id,
+            source_id=token.id,
             method="card",
             amount=100,
             currency="COP",
             iva="10",
             description="Customer test charge",
-            order_id=generate_order_id(),
-            device_session_id="kR1MiQhz2otdIuUlQkbEyitIqVMiI16f")
+            device_session_id=generate_order_id())
 
         self.assertEqual(1, len(customer.charges.all().data))
 

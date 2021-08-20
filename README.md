@@ -18,7 +18,13 @@ or
 
 See www.pip-installer.org/en/latest/index.html for instructions on installing pip.
 
+
 Implementation
+==============
+
+
+
+Usage for México
 ==============
 
 #### Configuration ####
@@ -34,8 +40,6 @@ openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 openpay.production = True  # By default this works in sandbox mode
 openpay.country = 'mx'  # 'mx' is default value, to use for Colombia set country='co'
 ```
-
-#### Usage for México ####
 
 Once configured the library, you can use it to interact with Openpay API services.
 
@@ -316,7 +320,9 @@ List all charged fees
 fees = openpay.Fee.all()
 ```
 
-#### Usage for Colombia ####
+
+Usage for Colombia
+==============
 
 ```python
 import openpay
