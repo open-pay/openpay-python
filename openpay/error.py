@@ -48,3 +48,9 @@ class InvalidRequestError(OpenpayError):
 
 class AuthenticationError(OpenpayError):
     pass
+
+
+class InvalidCountryError(OpenpayError):
+    def __init__(self, message, param, http_body=None, http_status=None, json_body=None):
+        super(InvalidCountryError, self).__init__(message, http_body, http_status, json_body)
+        self.param = param

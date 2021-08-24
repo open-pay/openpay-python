@@ -28,48 +28,65 @@ def generate_order_id():
 
 
 NOW = datetime.datetime.now()
-
+DUMMY_CUSTOMER = {
+    "name": "Cliente Colombia",
+    "last_name": "Vazquez Juarez",
+    "phone_number": "4448936475",
+    "email": "juan.vazquez@empresa.co"
+}
 DUMMY_CARD = {
-    'card_number': '4111111111111111',
     'holder_name': 'Juan Lopez',
-    'expiration_month': NOW.month,
-    'expiration_year': str(NOW.year + 4)[2:],
+    'card_number': '4111111111111111',
     "cvv2": "110",
-    "address": {
-        "line1": "Av. 5 de febrero No. 1080 int Roble 207",
-        "line2": "Carrillo puerto",
-        "line3": "Zona industrial carrillo puerto",
-        "postal_code": "06500",
-        "state": "Querétaro",
-        "city": "Querétaro",
-        "country_code": "MX"
-    }
+    'expiration_month': NOW.month,
+    'expiration_year': str(NOW.year + 4)[2:]
 }
 
 DUMMY_CHARGE = {
-    'amount': 100,
-    'card': DUMMY_CARD,
-    'order_id': generate_order_id(),
     'method': 'card',
+    'amount': 100,
+    'currency': 'COP',
+    'iva': '10',
+    'description': 'Dummy Charge'
+}
+
+DUMMY_CHARGE_MERCHANT = {
+    'method': 'card',
+    'amount': 100,
+    'currency': 'COP',
+    'iva': '10',
     'description': 'Dummy Charge',
+    'confirm': 'false',
+    'redirect_url': 'http://testing-openpay-col.com',
+    'customer': DUMMY_CUSTOMER
 }
 
 DUMMY_CHARGE_STORE = {
-    'amount': 100,
     'method': 'store',
-    'description': 'Dummy Charge on Store',
+    'amount': 100,
+    'currency': 'COP',
+    'iva': '10',
+    'description': 'Store Charge'
+}
+
+DUMMY_CHARGE_STORE_MERCHANT = {
+    'method': 'store',
+    'amount': 100,
+    'currency': 'COP',
+    'iva': '10',
+    'description': 'Store Charge',
+    'customer': DUMMY_CUSTOMER
 }
 
 DUMMY_PLAN = {
-    'amount': 2000,
-    'status_after_retry': 'cancelled',
     'name': 'Amazing Gold Plan',
-    'retry_times': 2,
-    'repeat_unit': 'month',
-    'trial_days': 0,
+    'amount': 2000,
     'repeat_every': 1,
-    'id': ('openpay-test-gold-' +
-           ''.join(random.choice(string.ascii_lowercase) for x in range(10)))
+    'repeat_unit': 'month',
+    'retry_times': 2,
+    'status_after_retry': 'cancelled',
+    'trial_days': 0
+
 }
 
 DUMMY_TRANSFER = {
@@ -79,6 +96,36 @@ DUMMY_TRANSFER = {
     'order_id': 'oid-00099',
 }
 
+DUMMY_PSE = {
+    'method': 'bank_account',
+    'amount': 100,
+    'currency': 'COP',
+    'iva': '10',
+    'description': 'Dummy PSE',
+    'confirm': 'false',
+    'redirect_url': 'http://testing-openpay-col.com'
+}
+
+DUMMY_PSE_MERCHANT = {
+    'method': 'bank_account',
+    'amount': 100,
+    'currency': 'COP',
+    'iva': '10',
+    'description': 'Dummy PSE',
+    'confirm': 'false',
+    'redirect_url': 'http://testing-openpay-col.com',
+    'customer': DUMMY_CUSTOMER
+}
+
+DUMMY_ADDRESS = {
+    "city": "Bogotá",
+    "country_code": "CO",
+    "postal_code": "110511",
+    "line1": "Av 5 de Febrero",
+    "line2": "Roble 207",
+    "line3": "col carrillo",
+    "state": "Bogota"
+}
 
 
 class OpenpayTestCase(unittest.TestCase):
@@ -97,9 +144,9 @@ class OpenpayTestCase(unittest.TestCase):
             openpay.api_base = api_base
         # Sandbox
         openpay.api_key = os.environ.get(
-            'OPENPAY_API_KEY', 'sk_10d37cc4da8e4ffd902cdf62e37abd1b')
-        openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
-        openpay.country = "mx"
+            'OPENPAY_API_KEY', 'sk_94a89308b4d7469cbda762c4b392152a')
+        openpay.merchant_id = "mwf7x79goz7afkdbuyqd"
+        openpay.country = "co"
         # Dev
         # openpay.api_key = os.environ.get(
         #    'OPENPAY_API_KEY', '68df281c16184d47bb773d70abd4191b')
