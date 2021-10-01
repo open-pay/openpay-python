@@ -242,7 +242,7 @@ subscription.save()
 Add payout for customer
 
 ```python
-bank_account = customer.bank_accounts.all()[0]  # We get the first account
+bank_account = customer.bank_accounts.all().data[0]  # We get the first account
 customer.payouts.create(
     method='bank_account',  # possible values ['bank_accunt', 'card']
     destination_id=bank_account.id,
@@ -476,7 +476,7 @@ pse = pse.create(
         "last_name": "Vazquez Juarez",
         "email": "juan.vazquez@empresa.co",
         "phone_number": "4448936475",
-        "requires_account": false,
+        "requires_account": False,
         "customer_address": {
             "department": "Medellín",
             "city": "Antioquía",
