@@ -22,7 +22,8 @@ def convert_to_openpay_object(resp, api_key, item_type=None):
     types = {'charge': Charge, 'customer': Customer,
              'plan': Plan, 'transfer': Transfer, 'list': ListObject,
              'card': Card, 'payout': Payout, 'subscription': Subscription,
-             'bank_account': BankAccount, 'fee': Fee, 'pse': Pse, 'checkout': Checkout}
+             'bank_account': BankAccount, 'fee': Fee, 'pse': Pse, 'checkout': Checkout,
+             'webhook': Webhook, 'token': Token}
 
     if isinstance(resp, list):
         return [convert_to_openpay_object(i, api_key, item_type) for i in resp]
@@ -690,6 +691,23 @@ class Pse(CreateableAPIResource):
         else:
             return "/v1/{0}/customers/{1}/charges".format(merchant_id, customer_id)
 
+
+class Webhook(CreateableAPIResource, ListableAPIResource, DeletableAPIResource):
+    @classmethod
+    def retrieve(cls, webhook_id=None, api_key=None, **params):
+        api_key = getattr(cls, 'api_key', openpay.api_key)
+        requestor = api.APIClient(api_key)
+        url = cls.build_url(webhook_id)
+        response, api_key = requestor.request('get', url, params)
+        return convert_to_openpay_object(response, api_key, 'checkout')
+
+    @classmethod
+    def build_url(cls, webhook_id):
+        merchant_id = openpay.merchant_id
+        if webhook_id is None:
+            return "/v1/{0}/webhooks".format(merchant_id)
+        if webhook_id is not None:
+            return "/v1/{0}/webhooks/{1}".format(merchant_id, webhook_id)
 
 class Checkout(CreateableAPIResource,
                UpdateableAPIResource, ListableAPIResource):

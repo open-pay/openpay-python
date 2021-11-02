@@ -122,6 +122,20 @@ DUMMY_CHECKOUT_WITHOUT_CUSTOMER = {
     "send_email": True
 }
 
+DUMMY_WEBHOOK = {
+    "url": "https://webhook.site/99e29beb-fd9e-4c3f-9b49-ad28bac3daa5",
+    "user": "juanito",
+    "password": "passjuanito",
+    "event_types":
+        [
+            "charge.refunded",
+            "charge.failed",
+            "charge.cancelled",
+            "charge.created",
+            "chargeback.accepted"
+        ]
+}
+
 class OpenpayTestCase(unittest.TestCase):
     RESTORE_ATTRIBUTES = ('api_version', 'api_key')
 

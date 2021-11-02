@@ -11,7 +11,7 @@ country = "mx"
 
 from openpay.resource import (  # noqa
     Card, Charge, Customer, Plan, Transfer,
-    Fee, BankAccount, Payout, Subscription, Pse, Token, Checkout)
+    Fee, BankAccount, Payout, Subscription, Pse, Token, Checkout, Webhook)
 
 # Error imports.  Note that we may want to move these out of the root
 # namespace in the future and you should prefer to access them via

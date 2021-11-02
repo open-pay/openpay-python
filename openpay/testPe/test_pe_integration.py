@@ -22,7 +22,7 @@ from openpay.testPe.helperpe import (
     OpenpayTestCase,
     NOW, DUMMY_CARD, DUMMY_CHARGE, DUMMY_PLAN,
     DUMMY_CHARGE_STORE, generate_order_id, DUMMY_CUSTOMER, DUMMY_ADDRESS, DUMMY_CHECKOUT, DUMMY_CHECKOUT_WITHOUT_CUSTOMER,
-    DUMMY_CHARGE_MERCHANT)
+    DUMMY_CHARGE_MERCHANT, DUMMY_WEBHOOK)
 
 
 class FunctionalTests(OpenpayTestCase):
@@ -238,6 +238,27 @@ class ChargeTest(OpenpayTestCase):
             openpay.Charge.retrieve_as_merchant(charge.id).status,
             'in_progress')
 
+class WebhookTest(OpenpayTestCase):
+    def test_list_webhooks(self):
+        webhooks = openpay.Webhook.all()
+        print (webhooks)
+        self.assertTrue(isinstance(webhooks.data, list))
+
+    def test_create_webhook(self):
+        webhook = openpay.Webhook.create(**DUMMY_WEBHOOK)
+        print (webhook)
+        self.assertEqual(webhook.status, 'verified')
+        self.assertEqual(webhook.user, DUMMY_WEBHOOK['user'])
+
+    def test_retrieve_webhook(self):
+        webhook_id = 'wa8i86qw6zpsgkcankbe'
+        webhook = openpay.Webhook.retrieve(webhook_id)
+        print webhook
+        self.assertEqual(webhook.id, webhook_id)
+
+    def test_delete_webhook(self):
+        webhook = openpay.Webhook.create(**DUMMY_WEBHOOK)
+        webhook.delete()
 
 class CustomerTest(OpenpayTestCase):
 
