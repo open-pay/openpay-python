@@ -725,22 +725,20 @@ class Checkout(CreateableAPIResource,
         return openpay_object
 
     @classmethod
-    def retrieve(cls, customer=None, order_id=None, api_key=None, **params):
+    def retrieve(cls, api_key=None, checkout_id=None, **params):
         api_key = getattr(cls, 'api_key', openpay.api_key)
         requestor = api.APIClient(api_key)
-        url = cls.build_url(customer, order_id)
+        url = cls.build_url(checkout_id)
         response, api_key = requestor.request('get', url, params)
         return convert_to_openpay_object(response, api_key, 'checkout')
 
     @classmethod
-    def build_url(cls, customer=None, order_id=None):
+    def build_url(cls, checkout_id=None):
         merchant_id = openpay.merchant_id
-        if customer is None and order_id is None:
+        if checkout_id is None:
             return "/v1/{0}/checkouts".format(merchant_id)
-        if order_id is not None:
-            return "/v1/{0}/orderId/{1}/checkouts".format(merchant_id, order_id)
-        if customer is not None:
-            return "/v1/{0}/customers/{1}/checkouts".format(merchant_id, customer)
+        if checkout_id is not None:
+            return "/v1/{0}/checkouts/{1}".format(merchant_id, checkout_id)
 
     def save(self):
         updated_params = self.serialize(self)

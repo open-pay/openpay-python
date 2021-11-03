@@ -524,6 +524,15 @@ class CheckoutTest(OpenpayTestCase):
         self.assertEqual(len(checkouts.data), limit)
         self.assertTrue(isinstance(checkouts, openpay.resource.ListObject))
 
+    def test_get_checkout(self):
+        limit = 3
+        startDate = "20211001"
+        endDate = "20211011"
+        checkouts = openpay.Checkout.all(limit=limit, startDate=startDate, endDate=endDate)
+        checkout = checkouts.data[0]
+        my_checkout = openpay.Checkout.retrieve(checkout_id=checkout.id)
+        self.assertEqual(my_checkout.id, checkout.id)
+
     @unittest.skip("Method not available")
     def test_checkout_get_by_order_id(self):
         my_checkout = openpay.Checkout.retrieve(order_id="oid_26851")
