@@ -22,7 +22,7 @@ from openpay.testPe.helperpe import (
     OpenpayTestCase,
     NOW, DUMMY_CARD, DUMMY_CHARGE, DUMMY_PLAN,
     DUMMY_CHARGE_STORE, generate_order_id, DUMMY_CUSTOMER, DUMMY_ADDRESS, DUMMY_CHECKOUT, DUMMY_CHECKOUT_WITHOUT_CUSTOMER,
-    DUMMY_CHARGE_MERCHANT, DUMMY_WEBHOOK)
+    DUMMY_CHARGE_MERCHANT, DUMMY_WEBHOOK, DUMMY_TOKEN)
 
 
 class FunctionalTests(OpenpayTestCase):
@@ -530,6 +530,17 @@ class CheckoutTest(OpenpayTestCase):
     def test_checkout_get_by_order_id(self):
         my_checkout = openpay.Checkout.retrieve(order_id="oid_26851")
         print my_checkout
+
+class TokenTest(OpenpayTestCase):
+
+    def test_create_token(self):
+        token = openpay.Token.create(**DUMMY_TOKEN)
+        self.assertTrue(isinstance(token, openpay.Token))
+
+    def test_get_token(self):
+        token = openpay.Token.create(**DUMMY_TOKEN)
+        token_ = openpay.Token.retrieve(token['id'])
+        self.assertEqual(token_['id'], token['id'])
 
 if __name__ == '__main__':
     unittest.main()

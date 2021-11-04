@@ -136,6 +136,23 @@ DUMMY_WEBHOOK = {
         ]
 }
 
+DUMMY_TOKEN = {
+    "card_number": "4111111111111111",
+    "holder_name": "Juan Perez Ramirez",
+    "expiration_year": "21",
+    "expiration_month": "12",
+    "cvv2": "110",
+    "address": {
+        "city": "Lima",
+        "country_code": "PE",
+        "postal_code": "110511",
+        "line1": "Av 5 de Febrero",
+        "line2": "Roble 207",
+        "line3": "col carrillo",
+        "state": "Lima"
+    }
+}
+
 class OpenpayTestCase(unittest.TestCase):
     RESTORE_ATTRIBUTES = ('api_version', 'api_key')
 

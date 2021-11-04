@@ -791,5 +791,5 @@ class Checkout(CreateableAPIResource,
         extn = quote_plus(id)
         return "%s/%s?status=%s" % (base, extn, status)
 
-class Token(CreateableAPIResource, ListableAPIResource):
+class Token(CreateableAPIResource):
     pass
