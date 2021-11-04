@@ -267,55 +267,47 @@ class CustomerTest(OpenpayTestCase):
         print(customers)
         self.assertTrue(isinstance(customers.data, list))
 
-    def test_list_charges(self):
+    def test_create_customer(self):
+        name = "Miguel Lopez"
+        customer = openpay.Customer.create(
+            name=name,
+            last_name="Mi last name",
+            email="col@example.com",
+            phone_number="5744484951",
+            description="foo bar")
+        self.assertEqual(name,customer['name'])
+
+    def test_update_customer(self):
+        name = "Miguel Lopez"
+        newName = "Miguel Nevo Lopez"
+        customer = openpay.Customer.create(
+            name=name,
+            last_name="Mi last name",
+            email="col@example.com",
+            phone_number="5744484951",
+            description="foo bar")
+        customer['name'] = newName
+        customer.save()
+        self.assertEqual(customer['name'], newName)
+
+    def test_get_customer(self):
+        customer = openpay.Customer.all().data[0]
+        customer_ = openpay.Customer.retrieve(customer['id'])
+        self.assertEqual(customer['id'], customer_['id'])
+
+    def test_delete_customer(self):
         customer = openpay.Customer.create(
             name="Miguel Lopez",
             last_name="Mi last name",
             email="col@example.com",
             phone_number="5744484951",
             description="foo bar")
-        token = openpay.Token.create(card_number='4111111111111111',
-                                     holder_name='Juan Perez Ramirez',
-                                     expiration_year='28', expiration_month='12', cvv2='110', address=DUMMY_ADDRESS)
-        customer.charges.create(
-            source_id=token.id,
-            method="card",
-            amount=100,
-            currency="PEN",
-            iva="10",
-            description="Customer test charge",
-            device_session_id=generate_order_id())
+        openpay.Customer.delete(customer)
+        self.assertEqual(customer, {})
 
-        self.assertEqual(1, len(customer.charges.all().data))
-
-    def test_checkouts(self):
+    def test_list_customer(self):
         customers = openpay.Customer.all()
-        customer = customers.data[0]
-        DUMMY_CHECKOUT_WITHOUT_CUSTOMER['order_id'] = generate_order_id();
-        customer.checkouts.create(**DUMMY_CHECKOUT_WITHOUT_CUSTOMER)
-
-    def test_all_checkouts(self):
-        customers = openpay.Customer.all()
-        customer = customers.data[0]
-        print customer.checkouts
-        print customer.checkouts.all()
-
-    @unittest.skip("Method not available in Peru")
-    def test_pse(self):
-        customer = openpay.Customer.create(
-            name="Miguel Lopez",
-            last_name="Mi last name",
-            email="col@example.com",
-            phone_number="5744484951",
-            description="foo bar")
-        pse = customer.pse.create(method='bank_account',
-                                  amount=100,
-                                  currency='PEN',
-                                  iva='10',
-                                  description='Dummy PSE',
-                                  redirect_url='/')
-
-        self.assertEqual(pse.method, 'bank_account')
+        self.assertTrue(isinstance(customers['data'], list))
 
 
 # ok
