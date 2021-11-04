@@ -733,10 +733,12 @@ class Checkout(CreateableAPIResource,
         return convert_to_openpay_object(response, api_key, 'checkout')
 
     @classmethod
-    def build_url(cls, checkout_id=None):
+    def build_url(cls, checkout_id=None, customer=None):
         merchant_id = openpay.merchant_id
-        if checkout_id is None:
+        if checkout_id is None and customer is None:
             return "/v1/{0}/checkouts".format(merchant_id)
+        if customer is not None:
+            return "/v1/{0}/customers/{1}/checkouts".format(merchant_id, customer)
         if checkout_id is not None:
             return "/v1/{0}/checkouts/{1}".format(merchant_id, checkout_id)
 
