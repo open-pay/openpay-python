@@ -259,6 +259,7 @@ class WebhookTest(OpenpayTestCase):
     def test_delete_webhook(self):
         webhook = openpay.Webhook.create(**DUMMY_WEBHOOK)
         webhook.delete()
+        self.assertEqual(webhook, {})
 
 class CustomerTest(OpenpayTestCase):
 
