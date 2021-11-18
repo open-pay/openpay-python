@@ -22,7 +22,8 @@ def convert_to_openpay_object(resp, api_key, item_type=None):
     types = {'charge': Charge, 'customer': Customer,
              'plan': Plan, 'transfer': Transfer, 'list': ListObject,
              'card': Card, 'payout': Payout, 'subscription': Subscription,
-             'bank_account': BankAccount, 'fee': Fee, 'pse': Pse}
+             'bank_account': BankAccount, 'fee': Fee, 'pse': Pse, 'checkout': Checkout,
+             'webhook': Webhook, 'token': Token}
 
     if isinstance(resp, list):
         return [convert_to_openpay_object(i, api_key, item_type) for i in resp]
@@ -581,6 +582,18 @@ class Customer(CreateableAPIResource, UpdateableAPIResource,
             self._pse = convert_to_openpay_object(data, self.api_key)
         return self._pse
 
+    @property
+    def checkouts(self):
+        data = {
+            'object': 'list',
+            'count': 0,
+            'url':Checkout.build_url(self.id),
+            'item_type': 'checkout'
+        }
+        if not hasattr(self, '_checkouts'):
+            self._checkouts = convert_to_openpay_object(data, self.api_key)
+        return self._checkouts
+
 
 class Plan(CreateableAPIResource, DeletableAPIResource,
            UpdateableAPIResource, ListableAPIResource):
@@ -679,6 +692,104 @@ class Pse(CreateableAPIResource):
             return "/v1/{0}/customers/{1}/charges".format(merchant_id, customer_id)
 
 
+class Webhook(CreateableAPIResource, ListableAPIResource, DeletableAPIResource):
+    @classmethod
+    def retrieve(cls, webhook_id=None, api_key=None, **params):
+        api_key = getattr(cls, 'api_key', openpay.api_key)
+        requestor = api.APIClient(api_key)
+        url = cls.build_url(webhook_id)
+        response, api_key = requestor.request('get', url, params)
+        return convert_to_openpay_object(response, api_key, 'checkout')
 
-class Token(CreateableAPIResource, ListableAPIResource):
+    @classmethod
+    def build_url(cls, webhook_id):
+        merchant_id = openpay.merchant_id
+        if webhook_id is None:
+            return "/v1/{0}/webhooks".format(merchant_id)
+        if webhook_id is not None:
+            return "/v1/{0}/webhooks/{1}".format(merchant_id, webhook_id)
+
+class Checkout(CreateableAPIResource,
+               UpdateableAPIResource, ListableAPIResource):
+
+    @classmethod
+    def create(cls, customer_id=None, **params):
+        if hasattr(cls, 'api_key'):
+            api_key = cls.api_key
+        else:
+            api_key = openpay.api_key
+        requestor = api.APIClient(api_key)
+        url = cls.build_url(customer=customer_id)
+        response, api_key = requestor.request('post', url, params)
+        openpay_object = convert_to_openpay_object(response, api_key)
+        return openpay_object
+
+    @classmethod
+    def retrieve(cls, api_key=None, checkout_id=None, **params):
+        api_key = getattr(cls, 'api_key', openpay.api_key)
+        requestor = api.APIClient(api_key)
+        url = cls.build_url(checkout_id)
+        response, api_key = requestor.request('get', url, params)
+        return convert_to_openpay_object(response, api_key, 'checkout')
+
+    @classmethod
+    def build_url(cls, checkout_id=None, customer=None):
+        merchant_id = openpay.merchant_id
+        if checkout_id is None and customer is None:
+            return "/v1/{0}/checkouts".format(merchant_id)
+        if customer is not None:
+            return "/v1/{0}/customers/{1}/checkouts".format(merchant_id, customer)
+        if checkout_id is not None:
+            return "/v1/{0}/checkouts/{1}".format(merchant_id, checkout_id)
+
+    def save(self):
+        updated_params = self.serialize(self)
+
+        if getattr(self, 'metadata', None):
+            updated_params['metadata'] = self.serialize_metadata()
+
+        if updated_params:
+            self.refresh_from(self.request('put', self.instance_url(),
+                                           updated_params))
+        else:
+            logger.debug("Trying to save already saved object %r", self)
+        return self
+
+    def serialize_metadata(self):
+        if 'metadata' in self._unsaved_values:
+            # the metadata object has been reassigned
+            # i.e. as object.metadata = {key: val}
+            metadata_update = self.metadata
+            keys_to_unset = set(self._previous_metadata.keys()) - \
+                            set(self.metadata.keys())
+            for key in keys_to_unset:
+                metadata_update[key] = ""
+
+            return metadata_update
+        else:
+            return self.serialize(self.metadata)
+
+    def serialize(self, obj):
+        params = {}
+        if obj._unsaved_values:
+            for k in obj._unsaved_values:
+                if k == 'id' or k == '_previous_metadata':
+                    continue
+                v = getattr(obj, k)
+                params[k] = v if v is not None else ""
+        return params
+
+    def instance_url(self):
+        id = self.get('id')
+        status = self.get('status')
+        if not id:
+            raise error.InvalidRequestError(
+                'Could not determine which URL to request: %s instance '
+                'has invalid ID: %r' % (type(self).__name__, id), 'id')
+        id = utf8(id)
+        base = self.class_url()
+        extn = quote_plus(id)
+        return "%s/%s?status=%s" % (base, extn, status)
+
+class Token(CreateableAPIResource):
     pass

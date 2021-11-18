@@ -242,7 +242,7 @@ subscription.save()
 Add payout for customer
 
 ```python
-bank_account = customer.bank_accounts.all()[0]  # We get the first account
+bank_account = customer.bank_accounts.all().data[0]  # We get the first account
 customer.payouts.create(
     method='bank_account',  # possible values ['bank_accunt', 'card']
     destination_id=bank_account.id,
@@ -320,6 +320,285 @@ List all charged fees
 fees = openpay.Fee.all()
 ```
 
+Usage for Perú
+==============
+
+#### Configuration ####
+
+Before use the library will be necessary to set up your Merchant ID and Private key.
+
+```python
+import openpay
+
+openpay.api_key = "sk_10d37cc4da8e4ffd902cdf62e37abd1b"
+openpay.verify_ssl_certs = False
+openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
+openpay.production = True  # By default this works in sandbox mode
+openpay.country = 'pe'  # 'mx' is default value, to use for Peru set country='pe'
+```
+Once configured the library, you can use it to interact with Openpay API services.
+
+##### Tokens #####
+
+Creating a token:
+
+```python
+openpay.Token.create(
+    card_number="4111111111111111",
+    holder_name="Juan Perez Ramirez",
+    expiration_year="20",
+    expiration_month="12",
+    cvv2="110",
+    address={
+        "city": "Lima",
+        "country_code": "PE",
+        "postal_code": "15076",
+        "line1": "Av 5 de Febrero",
+        "line2": "Roble 207",
+        "line3": "Lince",
+        "state": "Lima"
+    })
+```
+
+##### Customer #####
+
+Creating a customer:
+
+```python
+customer = openpay.Customer.create(
+    name="Juan",
+    email="somebody@example.com",
+    address={
+        "city": "Lima",
+        "country_code": "PE",
+        "postal_code": "15076",
+        "line1": "Av 5 de Febrero",
+        "line2": "Roble 207",
+        "line3": "Lince",
+        "state": "Lima"
+    },
+    last_name="Perez",
+    phone_number="44209087654"
+)
+```
+
+Once you have a customer, you have access to few resources for current customer. According to the current version of the
+Openpay API, these resources are:
+
+- cards
+- charges
+- transfers
+- payouts
+- bank accounts
+- subscriptions
+
+You can access all of these resources as public variables of the root instance (customer in this example), so, if you
+want to add a new card you will be able to do it as follows:
+
+```python
+card = customer.cards.create(
+    card_number="4111111111111111",
+    holder_name="Juan Perez Ramirez",
+    expiration_year="20",
+    expiration_month="12",
+    cvv2="110",
+    address={
+        "city": "Lima",
+        "country_code": "PE",
+        "postal_code": "15076",
+        "line1": "Av 5 de Febrero",
+        "line2": "Roble 207",
+        "line3": "Lince",
+        "state": "Lima"
+    })
+```
+
+Get a customer
+
+```python
+customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
+```
+
+Update a customer
+
+```python
+customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
+customer.last_name = "Lopez"
+customer.save()
+```
+
+Get all customers
+
+```python
+customers = openpay.Customer.all()
+```
+
+###### Customer Cards ######
+
+Get all customer cards
+
+```python
+cards = customer.cards.all()
+```
+
+Get specific customer card
+
+```python
+card = customer.cards.retrieve('kvxvccpsesm4pwmtgnjb')
+```
+
+Delete a customer card
+
+```python
+card = customer.cards.retrieve('kvxvccpsesm4pwmtgnjb')
+card.delete()
+```
+
+###### Customer Transfers ######
+
+Get all customer transfers (inbound and outbound)
+
+```python
+transfers = customer.transfers.all()
+```
+
+Create a customer transfer
+
+```python
+transfer1 = customer.transfers.create(
+    customer_id="acuqxruyv0hi1wfdwmym",
+    amount=100,
+    description="Test transfer",
+    order_id="oid-00059"
+)
+```
+
+Get specific transfer
+
+```python
+transfer2 = customer.transfers.retrieve(transfer1.id)
+```
+
+###### Bank Accounts ######
+
+Add bank account to customer
+
+```python
+bank_account = customer.bank_accounts.create(
+    clabe="032180000118359719",
+    alias="Cuenta principal",
+    holder_name="Juan Perez"
+)
+```
+
+Get all customer bank accounts
+
+```python
+accounts = customer.bank_accounts.all()
+```
+
+Get specific bank account
+
+```python
+account = customer.back_accounts.retrieve("bsbg7igxh3yukpu8t2q4")
+```
+
+###### Subscriptions ######
+
+Add subscription to customer
+
+```python
+customer.subscriptions.create(plan_id="pbkliysxavp8bvvp8f0k", trial_days="5", card_id="kvxvccpsesm4pwmtgnjb")
+```
+
+Cancel subscription
+
+```python
+subscription = customer.subscriptions.all()[0]
+subscription.delete()
+```
+
+List all customers subscriptions
+
+```python
+customer.subscriptions.all()
+```
+
+Update subscription
+
+```python
+subscription = customer.subscriptions.all()[0]
+subscription.cancel_at_end_period = True
+subscription.save()
+```
+
+###### Checkouts ######
+
+Add checkout to customer
+
+```python
+customer.checkouts.create(
+    {
+        "amount": 250,
+        "currency": "PEN",
+        "description": "Cargo cobro con link",
+        "redirect_url": "https://misitioempresa.pe",
+        "order_id": "oid-12331",
+        "expiration_date": "2021-08-31 12:50",
+        "send_email": True
+    })
+```
+
+List all customers checkouts
+
+```python
+customer.checkouts.all()
+```
+
+Update checkout
+
+```python
+subscription = customer.subscriptions.all()[0]
+subscription.cancel_at_end_period = True
+subscription.save()
+```
+
+##### Plan ######
+
+Create new plan
+
+```python
+plan = openpay.Plan.create(
+    amount=150.00,
+    status_after_retry="cancelled",
+    retry_times=2,
+    name="Curso de Ingles",
+    repeat_unit="month",
+    trial_days=30,
+    repeat_every=1
+)
+```
+
+Get specific plan
+
+```python
+plan2 = openpay.Plan.retrieve(plan.id)
+```
+
+Update a plan
+
+```python
+plan = openpay.Plan.retrieve('pbkliysxavp8bvvp8f0k')
+plan.name = "Curso de Ingles II"
+plan.save()
+```
+
+Delete plan
+
+```python
+plan = openpay.Plan.retrieve('pbkliysxavp8bvvp8f0k')
+plan.delete()
+```
 
 Usage for Colombia
 ==============
@@ -476,7 +755,7 @@ pse = pse.create(
         "last_name": "Vazquez Juarez",
         "email": "juan.vazquez@empresa.co",
         "phone_number": "4448936475",
-        "requires_account": false,
+        "requires_account": False,
         "customer_address": {
             "department": "Medellín",
             "city": "Antioquía",

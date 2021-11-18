@@ -11,7 +11,7 @@ country = "mx"
 
 from openpay.resource import (  # noqa
     Card, Charge, Customer, Plan, Transfer,
-    Fee, BankAccount, Payout, Subscription, Pse, Token)
+    Fee, BankAccount, Payout, Subscription, Pse, Token, Checkout, Webhook)
 
 # Error imports.  Note that we may want to move these out of the root
 # namespace in the future and you should prefer to access them via
@@ -43,8 +43,8 @@ _original_module = _sys.modules[__name__]
 
 def get_api_base():
     api_base = None
-    if country is None or (country != "mx" and country != "co"):
-        errorMessage = "Country is " + country + ", you can set country with value 'mx' or 'co', Mexico or Colombia respectively"
+    if country is None or (country != "mx" and country != "co" and country != "pe"):
+        errorMessage = "Country is " + country + ", you can set country with value 'mx', 'co' or 'pe', Mexico, Colombia or Peru respectively"
         logger.error(errorMessage)
         raise error.InvalidCountryError(errorMessage, None, None, 400, None)
     if country == "mx":
@@ -59,4 +59,10 @@ def get_api_base():
             api_base = str("https://sandbox-api.openpay.co")
         else:
             api_base = str("https://api.openpay.co")
+    if country == "pe":
+        logger.info("Country Peru")
+        if not production:
+            api_base = str("https://sandbox-api.openpay.pe")
+        else:
+            api_base = str("https://api.openpay.pe")
     return api_base
