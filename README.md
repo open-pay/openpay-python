@@ -10,6 +10,7 @@ Installation
 You don't need this source code unless you want to modify the package. If you just want use the Openpay Python bindings,
 you should run:
 
+    pip install "setuptools<58.0"
     pip install openpay
 
 or
@@ -646,14 +647,17 @@ customer = openpay.Customer.create(
     name="Juan",
     last_name="Perez",
     email="somebody@example.com",
-    address={
-        "city": "Bogotá",
-        "country_code": "CO",
-        "postal_code": "76900",
-        "line1": "bogota",
-        "line2": "colombia",
-        "line3": "col carrillo",
-        "state": "Bogota"
+    {
+        "name": "Pedro Diego",
+        "last_name": "Alatorre Martínez",
+        "email": "pedro.alatorre@comercio.com",
+        "phone_number": "5744484951",
+        "status": "active",
+        "customer_address": {
+            "department": "Medellín",
+            "city": "Antioquía",
+            "additional": "Avenida 7f bis # 138-58 Apartamento 942"
+        }
     },
     phone_number="7711234567"
 )
