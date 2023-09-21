@@ -214,7 +214,13 @@ account = customer.back_accounts.retrieve("bsbg7igxh3yukpu8t2q4")
 Add subscription to customer
 
 ```python
-customer.subscriptions.create(plan_id="pbkliysxavp8bvvp8f0k", trial_days="5", card_id="kvxvccpsesm4pwmtgnjb")
+customer.subscriptions.create(plan_id="pbkliysxavp8bvvp8f0k", trial_end_date="2023/12/31", card_id="kvxvccpsesm4pwmtgnjb")
+```
+
+Get customer subscriptions
+
+```python
+customer.subscriptions.retrieve("pbkliysxavp8bvvp8f0k")
 ```
 
 Cancel subscription
@@ -234,7 +240,16 @@ Update subscription
 
 ```python
 subscription = customer.subscriptions.all()[0]
-subscription.cancel_at_end_period = True
+subscription.cancel_at_period_end = True
+subscription.save()
+```
+
+Change subscription card by token
+
+```python
+subscription = customer.subscriptions.all()[0]
+subscription.card_id = "ppldmckf6ls94skdihkd"
+subscription.card = None
 subscription.save()
 ```
 
