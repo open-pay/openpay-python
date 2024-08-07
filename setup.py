@@ -43,5 +43,5 @@ setup(name='openpay',
       package_data={'openpay': ['data/ca-certificates.crt', '../VERSION']},
       install_requires=install_requires,
       test_suite='openpay.test.all',
-      use_2to3=True,
+      # use_2to3=True,
       )
