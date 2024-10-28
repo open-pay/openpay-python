@@ -8,6 +8,7 @@ import openpay
 openpay.api_key = "sk_10d37cc4da8e4ffd902cdf62e37abd1b"
 openpay.verify_ssl_certs = False
 openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
+openpay.public_ip = '138.84.62.226'
 
 newCustomer = openpay.Customer.create(
     external_id="AA_00003",

@@ -1,5 +1,6 @@
 import datetime
 import calendar
+import ipaddress
 import time
 # import warnings
 import platform
@@ -62,7 +63,6 @@ class APIClient(object):
 
     def __init__(self, key=None, client=None, test_mode=False):
         self.api_key = key
-
         from openpay import verify_ssl_certs
         openpay.test_mode = test_mode
 
@@ -115,6 +115,14 @@ class APIClient(object):
                 'from the Openpay Dashboard.  See http://docs.openpay.mx '
                 'for details, or email soporte@openpay.mx if you have any '
                 'questions.')
+        if openpay.public_ip is None or not openpay.public_ip.strip():
+            raise error.APIError(
+                'Public Ip can not be null or empty')
+
+        try:
+            ipaddress.ip_address(openpay.public_ip)
+        except ValueError:
+            raise error.APIError('Public Ip is not valid')
 
         abs_url = "{0}{1}".format(openpay.get_api_base(), url)
 
@@ -153,6 +161,8 @@ class APIClient(object):
 
         if api_version is not None:
             headers['Openpay-Version'] = api_version
+        if openpay.public_ip is not None:
+            headers['X-Forwarded-For'] = openpay.public_ip
 
         rbody, rcode = self._client.request(
             method, abs_url, headers, post_data, user=my_api_key)

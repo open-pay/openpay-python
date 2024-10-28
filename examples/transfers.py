@@ -8,7 +8,7 @@ import openpay
 openpay.api_key = "sk_10d37cc4da8e4ffd902cdf62e37abd1b"
 openpay.verify_ssl_certs = False
 openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
-
+openpay.public_ip = '138.84.62.226'
 
 customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
 print customer.transfers.create(customer_id="acuqxruyv0hi1wfdwmym", amount=100, description="Test transfer", order_id="oid-00059")

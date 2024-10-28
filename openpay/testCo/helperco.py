@@ -85,8 +85,8 @@ DUMMY_PLAN = {
     'repeat_unit': 'month',
     'retry_times': 2,
     'status_after_retry': 'cancelled',
-    'trial_days': 0
-
+    'trial_days': 0,
+'currency': 'COP',
 }
 
 DUMMY_TRANSFER = {
@@ -147,6 +147,7 @@ class OpenpayTestCase(unittest.TestCase):
             'OPENPAY_API_KEY', 'sk_94a89308b4d7469cbda762c4b392152a')
         openpay.merchant_id = "mwf7x79goz7afkdbuyqd"
         openpay.country = "co"
+        openpay.public_ip = '138.84.62.226'
         # Dev
         # openpay.api_key = os.environ.get(
         #    'OPENPAY_API_KEY', '68df281c16184d47bb773d70abd4191b')
