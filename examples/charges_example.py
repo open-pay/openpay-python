@@ -9,6 +9,7 @@ import openpay
 openpay.api_key = "sk_10d37cc4da8e4ffd902cdf62e37abd1b"
 openpay.verify_ssl_certs = False
 openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
+openpay.public_ip = '138.84.62.226'
 
 customer = openpay.Customer.retrieve('amce5ycvwycfzyarjf8l')
 print "customer: ", customer
@@ -16,7 +17,7 @@ print "customer: ", customer
 card = customer.cards.create(
 	card_number="4111111111111111",
 	holder_name="Juan Perez Ramirez",
-	expiration_year="20",
+	expiration_year="29",
 	expiration_month="12",
 	cvv2="110",
 	address={
@@ -43,7 +44,7 @@ print "Creating card as merchant"
 card = openpay.Card.create(
 	card_number="4111111111111111",
 	holder_name="Juan Perez",
-	expiration_year="20",
+	expiration_year="29",
 	expiration_month="12",
 	cvv2="110",
 	address={

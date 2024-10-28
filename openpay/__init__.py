@@ -7,6 +7,7 @@ production = False
 api_version = None
 verify_ssl_certs = True
 country = "mx"
+public_ip= None
 # Resource
 
 from openpay.resource import (  # noqa
@@ -37,6 +38,7 @@ _ALLOWED_ATTRIBUTES = (
     'api_version',
     'verify_ssl_certs',
     'TEST_MODE',
+    'public_ip'
 )
 _original_module = _sys.modules[__name__]
 

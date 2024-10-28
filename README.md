@@ -40,6 +40,7 @@ openpay.verify_ssl_certs = False
 openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 openpay.production = True  # By default this works in sandbox mode
 openpay.country = 'mx'  # 'mx' is default value, to use for Colombia set country='co'
+openpay.public_ip = '138.84.62.226' #Public IP address of the client, (this is not the server IP)
 ```
 
 Once configured the library, you can use it to interact with Openpay API services.
@@ -52,7 +53,7 @@ Creating a token:
 openpay.Token.create(
     card_number="4111111111111111",
     holder_name="Juan Perez Ramirez",
-    expiration_year="20",
+    expiration_year="29",
     expiration_month="12",
     cvv2="110",
     address={
@@ -105,7 +106,7 @@ want to add a new card you will be able to do it as follows:
 card = customer.cards.create(
     card_number="4111111111111111",
     holder_name="Juan Perez Ramirez",
-    expiration_year="20",
+    expiration_year="29",
     expiration_month="12",
     cvv2="110",
     address={
@@ -336,6 +337,8 @@ openpay.verify_ssl_certs = False
 openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 openpay.production = True  # By default this works in sandbox mode
 openpay.country = 'pe'  # 'mx' is default value, to use for Peru set country='pe'
+openpay.public_ip = '138.84.62.226' #Public IP address of the client, (this is not the server IP)
+
 ```
 Once configured the library, you can use it to interact with Openpay API services.
 
@@ -347,7 +350,7 @@ Creating a token:
 openpay.Token.create(
     card_number="4111111111111111",
     holder_name="Juan Perez Ramirez",
-    expiration_year="20",
+    expiration_year="29",
     expiration_month="12",
     cvv2="110",
     address={
@@ -400,7 +403,7 @@ want to add a new card you will be able to do it as follows:
 card = customer.cards.create(
     card_number="4111111111111111",
     holder_name="Juan Perez Ramirez",
-    expiration_year="20",
+    expiration_year="29",
     expiration_month="12",
     cvv2="110",
     address={
@@ -612,6 +615,7 @@ openpay.verify_ssl_certs = False
 openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
 openpay.production = True  # By default this works in sandbox mode
 openpay.country = 'co'  # 'mx' is default value, to use for Colombia set country='co'
+openpay.public_ip = '138.84.62.226' #Public IP address of the client, (this is not the server IP)
 ```
 
 Once configured the library, you can use it to interact with Openpay API services for Colombia.

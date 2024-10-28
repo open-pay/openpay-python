@@ -139,7 +139,7 @@ DUMMY_WEBHOOK = {
 DUMMY_TOKEN = {
     "card_number": "4111111111111111",
     "holder_name": "Juan Perez Ramirez",
-    "expiration_year": "21",
+    "expiration_year": "29",
     "expiration_month": "12",
     "cvv2": "110",
     "address": {
@@ -172,6 +172,7 @@ class OpenpayTestCase(unittest.TestCase):
             'OPENPAY_API_KEY', 'sk_f934dfe51645483e82106301d985a4f6')
         openpay.merchant_id = "m3cji4ughukthjcsglv0"
         openpay.country = "pe"
+        openpay.public_ip = '138.84.62.226'
         # Dev
         # openpay.api_key = os.environ.get(
         #    'OPENPAY_API_KEY', '68df281c16184d47bb773d70abd4191b')

@@ -8,6 +8,7 @@ import openpay
 openpay.api_key = "sk_10d37cc4da8e4ffd902cdf62e37abd1b"
 openpay.verify_ssl_certs = False
 openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
+openpay.public_ip = '138.84.62.226'
 # Creating a plan
 #plan = openpay.Plan.create(amount=150.00, status_after_retry="cancelled", retry_times=2,
 #                           name="Curso de Ingles", repeat_unit="month", trial_days=30, repeat_every=1)
@@ -26,7 +27,7 @@ customer = openpay.Customer.retrieve('ancgmuvdtcvppcsfi3j4')
 # print customer.cards.create(
 # 	card_number="4111111111111111",
 # 	holder_name="Juan Perez Ramirez",
-# 	expiration_year="20",
+# 	expiration_year="29",
 # 	expiration_month="12",
 # 	cvv2="110",
 # 	address={

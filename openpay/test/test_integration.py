@@ -213,8 +213,9 @@ class ChargeTest(OpenpayTestCase):
         self.assertTrue(hasattr(charge, 'payment_method'))
         self.assertTrue(hasattr(charge.payment_method, 'reference'))
         self.assertTrue(hasattr(charge.payment_method, 'barcode_url'))
+        chargeStatus=customer.charges.retrieve(charge.id)
         self.assertEqual(
-            customer.charges.retrieve(charge.id).status,
+            chargeStatus.status,
             'in_progress')
 
     def test_charge_store_as_merchant(self):
@@ -420,7 +421,7 @@ class PayoutTest(OpenpayTestCase):
         self.card = self.customer.cards.create(
             card_number="4111111111111111",
             holder_name="Juan Perez",
-            expiration_year="20",
+            expiration_year="29",
             expiration_month="12",
             cvv2="110",
             address={
@@ -465,7 +466,7 @@ class CardTest(OpenpayTestCase):
         self.card = self.customer.cards.create(
             card_number="4111111111111111",
             holder_name="Juan Perez",
-            expiration_year="20",
+            expiration_year="29",
             expiration_month="12",
             cvv2="110",
             address={
@@ -514,7 +515,7 @@ class FeeTest(OpenpayTestCase):
         self.card = self.customer.cards.create(
             card_number="4111111111111111",
             holder_name="Juan Perez",
-            expiration_year="20",
+            expiration_year="29",
             expiration_month="12",
             cvv2="110",
             address={
@@ -562,7 +563,7 @@ class TransferTest(OpenpayTestCase):
         self.card = self.customer.cards.create(
             card_number="4111111111111111",
             holder_name="Juan Perez",
-            expiration_year="20",
+            expiration_year="29",
             expiration_month="12",
             cvv2="110",
             address={

@@ -100,6 +100,7 @@ class OpenpayTestCase(unittest.TestCase):
             'OPENPAY_API_KEY', 'sk_10d37cc4da8e4ffd902cdf62e37abd1b')
         openpay.merchant_id = "mynvbjhtzxdyfewlzmdo"
         openpay.country = "mx"
+        openpay.public_ip = '::1234:5678 '
         # Dev
         # openpay.api_key = os.environ.get(
         #    'OPENPAY_API_KEY', '68df281c16184d47bb773d70abd4191b')
